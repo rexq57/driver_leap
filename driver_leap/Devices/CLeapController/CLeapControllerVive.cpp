@@ -103,11 +103,11 @@ void CLeapControllerVive::ActivateInternal()
     vr::VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trigger/value", &m_buttons[VB_TriggerValue]->GetHandleRef(), vr::VRScalarType_Absolute, vr::VRScalarUnits_NormalizedOneSided);
     m_buttons[VB_TriggerValue]->SetInputType(CControllerButton::IT_Float);
 
-    vr::VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/x", &m_buttons[VB_TrackpadX]->GetHandleRef(), vr::VRScalarType_Absolute, vr::VRScalarUnits_NormalizedTwoSided);
-    m_buttons[VB_TrackpadX]->SetInputType(CControllerButton::IT_Float);
+    //vr::VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/x", &m_buttons[VB_TrackpadX]->GetHandleRef(), vr::VRScalarType_Absolute, vr::VRScalarUnits_NormalizedTwoSided);
+    //m_buttons[VB_TrackpadX]->SetInputType(CControllerButton::IT_Float);
 
-    vr::VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/y", &m_buttons[VB_TrackpadY]->GetHandleRef(), vr::VRScalarType_Absolute, vr::VRScalarUnits_NormalizedTwoSided);
-    m_buttons[VB_TrackpadY]->SetInputType(CControllerButton::IT_Float);
+    //vr::VRDriverInput()->CreateScalarComponent(m_propertyContainer, "/input/trackpad/y", &m_buttons[VB_TrackpadY]->GetHandleRef(), vr::VRScalarType_Absolute, vr::VRScalarUnits_NormalizedTwoSided);
+    //m_buttons[VB_TrackpadY]->SetInputType(CControllerButton::IT_Float);
 
     vr::VRDriverInput()->CreateBooleanComponent(m_propertyContainer, "/input/trackpad/touch", &m_buttons[VB_TrackpadTouch]->GetHandleRef());
     m_buttons[VB_TrackpadTouch]->SetInputType(CControllerButton::IT_Boolean);
