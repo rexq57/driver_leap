@@ -104,6 +104,16 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
             }
         }
     }
+
+    // ÅÅ³ý
+    if (f_result[HG_ThumbCrossTouch] > 0.0f) {
+
+        // A¡¢B¼ü
+        f_result[HG_ThumbPinkyTouch] = 0;
+        f_result[HG_ThumbMiddleTouch] = 0;
+        // ÏµÍ³¼ü
+        f_result[HG_PalmTouch] = 0;
+    }
 }
 
 float CGestureMatcher::NormalizeRange(float f_val, float f_min, float f_max)
