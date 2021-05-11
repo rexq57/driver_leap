@@ -1,3 +1,19 @@
+中文说明：
+该项目只匹配leap motion模拟的Index控制器
+操作：
+【菜单】 食指触摸另一个手掌
+【扳机】 食指扣
+【B键】 拇指触摸小指
+【A键】 拇指触摸中指
+【触摸触摸板】拇指触摸食指中间节
+【触摸板XY】 保持触摸板触摸状态，脑部另一只手的食指射线，划过触摸板手掌心，来改变坐标
+【摇杆】食指触摸另一只手的拇指，移动食指来控制摇杆
+
+注意事项：
+为了防止误触，最好保持手掌张开
+
+########################################################
+
 # Driver Leap [![Build status](https://ci.appveyor.com/api/projects/status/2pc49d2hpt2hx944?svg=true)](https://ci.appveyor.com/project/SDraw/driver-leap) [![Release](http://img.shields.io/github/release/SDraw/driver_leap.svg)](../../releases/latest)
 
 Fork with updated vendor libraries.
