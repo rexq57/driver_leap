@@ -315,14 +315,22 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
             m_buttons[IB_TrackpadY]->SetValue(0.f);
         }
 
-        m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.5f);
-        m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.75f);
+        //m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.5f);
+        //m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.75f);
+        //m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
+        //m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
+        //m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.5f);
+        //m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.75f);
+        {
+            m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
+            m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
 
-        m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
-        m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
+            m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.5f);
+            m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.75f);
 
-        m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.5f);
-        m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.75f);
+            m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.5f);
+            m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.75f);
+        }
 
         m_buttons[IB_ThumbstickTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.5f);
         m_buttons[IB_ThumbstickClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.75f);

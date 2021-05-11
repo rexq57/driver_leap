@@ -7,6 +7,11 @@ const float g_piHalf = g_pi * 0.5f;
 const float g_piQuarter = g_pi * 0.25f;
 extern const glm::mat4 g_identityMatrix;
 
+void Merge(float& result, float value)
+{
+    result = std::max(result, value);
+}
+
 void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f_result, const LEAP_HAND *f_oppHand)
 {
     f_result.resize(HG_Count, 0.f);
@@ -37,6 +42,23 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
     glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
     glm::vec3 l_end(f_hand->index.intermediate.prev_joint.x, f_hand->index.intermediate.prev_joint.y, f_hand->index.intermediate.prev_joint.z);
     f_result[HG_ThumbPress] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);
+
+    // 拇指和中指
+    {
+        glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
+        glm::vec3 l_end(f_hand->middle.distal.next_joint.x, f_hand->middle.distal.next_joint.y, f_hand->middle.distal.next_joint.z);
+        float l_length = glm::distance(l_start, l_end);
+        f_result[HG_ThumbMiddleTouch] = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+    }
+
+    // 拇指和小指
+    {
+        glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
+        glm::vec3 l_end(f_hand->pinky.distal.next_joint.x, f_hand->pinky.distal.next_joint.y, f_hand->pinky.distal.next_joint.z);
+        float l_length = glm::distance(l_start, l_end);
+        f_result[HG_ThumbPinkyTouch] = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+    }
+
 
     // Two-handed gestures
     if(f_oppHand)

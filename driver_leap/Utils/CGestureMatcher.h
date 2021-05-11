@@ -18,7 +18,11 @@ public:
         HG_Grab,
         HG_ThumbPress,
 
+        HG_ThumbMiddleTouch,
+        HG_ThumbPinkyTouch,
+
         // Two-handed gesture
+        HG_Timeout,
         HG_OpisthenarTouch,
         HG_PalmTouch,
         HG_PalmPointX,
