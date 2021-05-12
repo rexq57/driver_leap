@@ -12,6 +12,58 @@ void Merge(float& result, float value)
     result = std::max(result, value);
 }
 
+float Length3D(const float* x)
+{
+    return sqrtf(x[0]* x[0] + x[1]* x[1] + x[2]* x[2]);
+}
+
+static float lastHG_Trigger = 0;
+static float lastHG_ThumbMiddleTouch = 0;
+static float lastHG_ThumbPinkyTouch = 0;
+
+#define FOLDER_NAME "log"
+static bool MTHLogEnabled = true;
+static FILE* _logfp = 0;
+
+void MTHLog(const char* str, ...)
+{
+
+    if (MTHLogEnabled)
+    {
+        // 这里不能加锁
+        va_list pArgs;// = NULL;
+
+        if (!_logfp)
+        {
+            // 存储到tmp指定文件夹
+            const char* logFilePath = "log.txt";
+            _logfp = fopen(logFilePath, "w");
+            if (!_logfp)
+            {
+                assert(!"无法创建log.txt!");
+                exit(0);
+            }
+            else {
+                printf("[%s] 已创建日志文件: %s\n", FOLDER_NAME, logFilePath);
+            }
+        }
+
+        va_start(pArgs, str);
+
+        // 写入文件
+        vfprintf(_logfp, str, pArgs); fputs("\n", _logfp);
+
+        // 额外打印到控制台
+        printf("[%s] ", FOLDER_NAME); vprintf(str, pArgs); printf("\n");
+
+        // 清理缓冲区
+        fflush(_logfp);
+
+        va_end(pArgs);
+    }
+
+}
+
 void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f_result, const LEAP_HAND *f_oppHand)
 {
     f_result.resize(HG_Count, 0.f);
@@ -34,8 +86,19 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
 
     for(size_t i = 0U; i <= HG_PinkyBend; i++) f_result[i] = NormalizeRange(l_fingerBend[i], g_piHalf, g_pi);
 
+    bool fast_moving = Length3D(f_hand->palm.velocity.v) > 300.0f;
+
     // Simple gestures
-    f_result[HG_Trigger] = f_result[HG_IndexBend];
+    float now_value = f_result[HG_IndexBend];
+    if (fast_moving && now_value <= 0.1f && lastHG_Trigger >= 0.1f) {
+        f_result[HG_Trigger] = 0.1f;
+    }
+    else {
+        f_result[HG_Trigger] = now_value;
+    }
+    lastHG_Trigger = f_result[HG_Trigger];
+
+
     f_result[HG_Grab] = NormalizeRange((l_fingerBend[2U] + l_fingerBend[3U] + l_fingerBend[4U]) / 3.f, g_piHalf, g_pi);
 
     // Little complex gestures
@@ -43,12 +106,24 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
     glm::vec3 l_end(f_hand->index.intermediate.prev_joint.x, f_hand->index.intermediate.prev_joint.y, f_hand->index.intermediate.prev_joint.z);
     f_result[HG_ThumbPress] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);
 
+    
+
     // 拇指和中指
     {
         glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
         glm::vec3 l_end(f_hand->middle.distal.next_joint.x, f_hand->middle.distal.next_joint.y, f_hand->middle.distal.next_joint.z);
         float l_length = glm::distance(l_start, l_end);
-        f_result[HG_ThumbMiddleTouch] = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+        float now_value = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+        // 根据速度，做上一次的补偿
+        if (fast_moving && now_value <= 0.5f && lastHG_ThumbMiddleTouch >= 0.5f) {
+            f_result[HG_ThumbMiddleTouch] = 0.5f;
+            //MTHLog("fuck last %f %f", lastHG_ThumbMiddleTouch, Length3D(f_hand->palm.velocity.v) / 10000.0f);
+        } else {
+            f_result[HG_ThumbMiddleTouch] = now_value;
+        }
+        lastHG_ThumbMiddleTouch = f_result[HG_ThumbMiddleTouch];
+
+        //MTHLog("A %f %f (%f) (%f,%f,%f) %d %d ", f_result[HG_ThumbMiddleTouch], now_value, Length3D(f_hand->palm.velocity.v), f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z, Length3D(f_hand->palm.velocity.v) > 300.0f, now_value < 0.0f);
     }
 
     // 拇指和小指
@@ -56,7 +131,15 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
         glm::vec3 l_end(f_hand->pinky.distal.next_joint.x, f_hand->pinky.distal.next_joint.y, f_hand->pinky.distal.next_joint.z);
         float l_length = glm::distance(l_start, l_end);
-        f_result[HG_ThumbPinkyTouch] = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+        float now_value = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+
+        if (fast_moving && now_value <= 0.5f && lastHG_ThumbPinkyTouch >= 0.5f) {
+            f_result[HG_ThumbPinkyTouch] = 0.5f;
+        }
+        else {
+            f_result[HG_ThumbPinkyTouch] = now_value;
+        }
+        lastHG_ThumbPinkyTouch = f_result[HG_ThumbPinkyTouch];
     }
 
 
@@ -112,6 +195,13 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         f_result[HG_ThumbPinkyTouch] = 0;
         f_result[HG_ThumbMiddleTouch] = 0;
         // 系统键
+        f_result[HG_PalmTouch] = 0;
+    }
+    if (f_result[HG_ThumbMiddleTouch] > 0.0f) {
+        f_result[HG_ThumbPinkyTouch] = 0;
+        f_result[HG_PalmTouch] = 0;
+    }
+    if (f_result[HG_ThumbPinkyTouch] > 0.0f) {
         f_result[HG_PalmTouch] = 0;
     }
 }

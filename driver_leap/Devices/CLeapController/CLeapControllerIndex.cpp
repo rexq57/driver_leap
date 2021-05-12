@@ -142,6 +142,8 @@ size_t CLeapControllerIndex::GetFingerBoneIndex(size_t f_id)
     return l_result;
 }
 
+
+
 void CLeapControllerIndex::ActivateInternal()
 {
     // Properties
@@ -288,6 +290,11 @@ void CLeapControllerIndex::ActivateInternal()
     vr::VRDriverInput()->CreateHapticComponent(m_propertyContainer, "/output/haptic", &m_haptic);
 }
 
+static float Length3D(const float* x)
+{
+    return sqrtf(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+}
+
 void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HAND *f_oppHand)
 {
     if(f_hand)
@@ -330,6 +337,8 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
 
             m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.5f);
             m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.75f);
+
+            
         }
 
         m_buttons[IB_ThumbstickTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.5f);
