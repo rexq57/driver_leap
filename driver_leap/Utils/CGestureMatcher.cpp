@@ -90,13 +90,14 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
 
     // Simple gestures
     float now_value = f_result[HG_IndexBend];
-    if (fast_moving && now_value <= 0.1f && lastHG_Trigger >= 0.1f) {
-        f_result[HG_Trigger] = 0.1f;
-    }
-    else {
-        f_result[HG_Trigger] = now_value;
-    }
-    lastHG_Trigger = f_result[HG_Trigger];
+    f_result[HG_Trigger] = now_value;
+    // if (fast_moving && now_value <= 0.1f && lastHG_Trigger >= 0.1f) {
+    //     f_result[HG_Trigger] = 0.1f;
+    // }
+    // else {
+    //     f_result[HG_Trigger] = now_value;
+    // }
+    // lastHG_Trigger = f_result[HG_Trigger];
 
 
     f_result[HG_Grab] = NormalizeRange((l_fingerBend[2U] + l_fingerBend[3U] + l_fingerBend[4U]) / 3.f, g_piHalf, g_pi);
@@ -212,18 +213,22 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         f_result[HG_ThumbPinkyTouch] = 0;
         f_result[HG_PalmTouch] = 0;
     }
+
     if (f_result[HG_ThumbPinkyTouch] > 0.0f) {
         f_result[HG_PalmTouch] = 0;
     }
 
-    if (f_result[HG_Grab] >= 0.75f) {
+    // 抓取
+    if (f_result[HG_Grab] >= 0.25f) {
         f_result[HG_ThumbPinkyTouch] = 0;
         f_result[HG_ThumbMiddleTouch] = 0;
         f_result[HG_PalmTouch] = 0;
-        f_result[HG_Trigger] = 0;
-
         f_result[HG_ThumbPress] = 0;
-    }   
+
+        if (f_result[HG_Grab] < 0.75f) {
+            f_result[HG_Trigger] = 0;
+        }
+    }
 }
 
 float CGestureMatcher::NormalizeRange(float f_val, float f_min, float f_max)
