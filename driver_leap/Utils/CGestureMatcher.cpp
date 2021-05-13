@@ -11,7 +11,7 @@ void Merge(float& result, float value)
 {
     result = std::max(result, value);
 }
-
+ 
 float Length3D(const float* x)
 {
     return sqrtf(x[0]* x[0] + x[1]* x[1] + x[2]* x[2]);
@@ -30,33 +30,33 @@ void MTHLog(const char* str, ...)
 
     if (MTHLogEnabled)
     {
-        // ÕâÀï²»ÄÜ¼ÓËø
+        // ï¿½ï¿½ï¿½ï²»ï¿½Ü¼ï¿½ï¿½ï¿½
         va_list pArgs;// = NULL;
 
         if (!_logfp)
         {
-            // ´æ´¢µ½tmpÖ¸¶¨ÎÄ¼þ¼Ð
+            // ï¿½æ´¢ï¿½ï¿½tmpÖ¸ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
             const char* logFilePath = "log.txt";
             _logfp = fopen(logFilePath, "w");
             if (!_logfp)
             {
-                assert(!"ÎÞ·¨´´½¨log.txt!");
+                assert(!"ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½log.txt!");
                 exit(0);
             }
             else {
-                printf("[%s] ÒÑ´´½¨ÈÕÖ¾ÎÄ¼þ: %s\n", FOLDER_NAME, logFilePath);
+                printf("[%s] ï¿½Ñ´ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½Ä¼ï¿½: %s\n", FOLDER_NAME, logFilePath);
             }
         }
 
         va_start(pArgs, str);
 
-        // Ð´ÈëÎÄ¼þ
+        // Ð´ï¿½ï¿½ï¿½Ä¼ï¿½
         vfprintf(_logfp, str, pArgs); fputs("\n", _logfp);
 
-        // ¶îÍâ´òÓ¡µ½¿ØÖÆÌ¨
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¨
         printf("[%s] ", FOLDER_NAME); vprintf(str, pArgs); printf("\n");
 
-        // ÇåÀí»º³åÇø
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         fflush(_logfp);
 
         va_end(pArgs);
@@ -108,38 +108,44 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
 
     
 
-    // Ä´Ö¸ºÍÖÐÖ¸
+    // Thumb Middle
     {
         glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
         glm::vec3 l_end(f_hand->middle.distal.next_joint.x, f_hand->middle.distal.next_joint.y, f_hand->middle.distal.next_joint.z);
         float l_length = glm::distance(l_start, l_end);
-        float now_value = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
-        // ¸ù¾ÝËÙ¶È£¬×öÉÏÒ»´ÎµÄ²¹³¥
-        if (fast_moving && now_value <= 0.5f && lastHG_ThumbMiddleTouch >= 0.5f) {
-            f_result[HG_ThumbMiddleTouch] = 0.5f;
-            //MTHLog("fuck last %f %f", lastHG_ThumbMiddleTouch, Length3D(f_hand->palm.velocity.v) / 10000.0f);
-        } else {
-            f_result[HG_ThumbMiddleTouch] = now_value;
-        }
-        lastHG_ThumbMiddleTouch = f_result[HG_ThumbMiddleTouch];
+        float now_value = (l_length <= 50.f) ? std::min((50.f - l_length) / 20.f, 1.f) : 0.f;
+
+        f_result[HG_ThumbMiddleTouch] = now_value;
+
+        // MTHLog("fuck %f", l_length);
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È£ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ÎµÄ²ï¿½ï¿½ï¿½
+        // if (fast_moving && now_value <= 0.5f && lastHG_ThumbMiddleTouch >= 0.5f) {
+        //     f_result[HG_ThumbMiddleTouch] = 0.5f;
+        //     //MTHLog("fuck last %f %f", lastHG_ThumbMiddleTouch, Length3D(f_hand->palm.velocity.v) / 10000.0f);
+        // } else {
+        //     f_result[HG_ThumbMiddleTouch] = now_value;
+        // }
+        // lastHG_ThumbMiddleTouch = f_result[HG_ThumbMiddleTouch];
 
         //MTHLog("A %f %f (%f) (%f,%f,%f) %d %d ", f_result[HG_ThumbMiddleTouch], now_value, Length3D(f_hand->palm.velocity.v), f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z, Length3D(f_hand->palm.velocity.v) > 300.0f, now_value < 0.0f);
     }
 
-    // Ä´Ö¸ºÍÐ¡Ö¸
+    // Thumb Pinky
     {
         glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
         glm::vec3 l_end(f_hand->pinky.distal.next_joint.x, f_hand->pinky.distal.next_joint.y, f_hand->pinky.distal.next_joint.z);
         float l_length = glm::distance(l_start, l_end);
-        float now_value = (l_length <= 35.f) ? std::min((35.f - l_length) / 20.f, 1.f) : 0.f;
+        float now_value = (l_length <= 50.f) ? std::min((50.f - l_length) / 20.f, 1.f) : 0.f;
 
-        if (fast_moving && now_value <= 0.5f && lastHG_ThumbPinkyTouch >= 0.5f) {
-            f_result[HG_ThumbPinkyTouch] = 0.5f;
-        }
-        else {
-            f_result[HG_ThumbPinkyTouch] = now_value;
-        }
-        lastHG_ThumbPinkyTouch = f_result[HG_ThumbPinkyTouch];
+        f_result[HG_ThumbPinkyTouch] = now_value;
+
+        // if (fast_moving && now_value <= 0.5f && lastHG_ThumbPinkyTouch >= 0.5f) {
+        //     f_result[HG_ThumbPinkyTouch] = 0.5f;
+        // }
+        // else {
+        //     f_result[HG_ThumbPinkyTouch] = now_value;
+        // }
+        // lastHG_ThumbPinkyTouch = f_result[HG_ThumbPinkyTouch];
     }
 
 
@@ -188,15 +194,20 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         }
     }
 
-    // ÅÅ³ý
     if (f_result[HG_ThumbCrossTouch] > 0.0f) {
 
-        // A¡¢B¼ü
         f_result[HG_ThumbPinkyTouch] = 0;
         f_result[HG_ThumbMiddleTouch] = 0;
-        // ÏµÍ³¼ü
         f_result[HG_PalmTouch] = 0;
     }
+
+    if (f_result[HG_ThumbPress] >= 0.5f) {
+
+        f_result[HG_ThumbPinkyTouch] = 0;
+        f_result[HG_ThumbMiddleTouch] = 0;
+        f_result[HG_PalmTouch] = 0;
+    }
+
     if (f_result[HG_ThumbMiddleTouch] > 0.0f) {
         f_result[HG_ThumbPinkyTouch] = 0;
         f_result[HG_PalmTouch] = 0;
@@ -204,6 +215,15 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
     if (f_result[HG_ThumbPinkyTouch] > 0.0f) {
         f_result[HG_PalmTouch] = 0;
     }
+
+    if (f_result[HG_Grab] >= 0.75f) {
+        f_result[HG_ThumbPinkyTouch] = 0;
+        f_result[HG_ThumbMiddleTouch] = 0;
+        f_result[HG_PalmTouch] = 0;
+        f_result[HG_Trigger] = 0;
+
+        f_result[HG_ThumbPress] = 0;
+    }   
 }
 
 float CGestureMatcher::NormalizeRange(float f_val, float f_min, float f_max)

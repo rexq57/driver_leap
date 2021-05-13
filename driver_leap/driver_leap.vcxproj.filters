@@ -39,6 +39,9 @@
     <ClCompile Include="Devices\CLeapController\CLeapControllerOculus.cpp">
       <Filter>Devices\CLeapController</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\CControlMatcher.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -74,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="Devices\CLeapController\CLeapControllerOculus.h">
       <Filter>Devices\CLeapController</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\CControlMatcher.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
