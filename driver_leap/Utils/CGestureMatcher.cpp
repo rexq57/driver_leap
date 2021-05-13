@@ -21,6 +21,7 @@ static float lastHG_Trigger = 0;
 static float lastHG_ThumbMiddleTouch = 0;
 static float lastHG_ThumbPinkyTouch = 0;
 
+
 #define FOLDER_NAME "log"
 static bool MTHLogEnabled = true;
 static FILE* _logfp = 0;
@@ -107,7 +108,28 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
     glm::vec3 l_end(f_hand->index.intermediate.prev_joint.x, f_hand->index.intermediate.prev_joint.y, f_hand->index.intermediate.prev_joint.z);
     f_result[HG_ThumbPress] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);
 
-    
+    // 摁下拇指后，记录XZ中心点，并算出水平位移，在XZ面上
+    // if(f_result[HG_ThumbPress] >= 0.5f) {
+    //     if (last_ThumbPressX == 0 && last_ThumbPressY == 0) {
+    //         last_ThumbPressX = l_start.x;
+    //         last_ThumbPressY = l_start.y;
+    //         // MTHLog("%f %f %f", l_start.x, l_start.y, l_start.z);
+    //     }
+
+    //     // 计算与中心点的角度
+    //     glm::vec2 l_uv(-(l_start.x - last_ThumbPressX), l_start.y - last_ThumbPressY);
+    //     l_uv /= 25.0f;
+
+    //     glm::vec2 old_uv = l_uv;
+
+    //     if(glm::length(l_uv) > 1.f)
+    //         l_uv = glm::normalize(l_uv);
+
+    //     f_result[HG_PalmPointX] = l_uv.x;
+    //     f_result[HG_PalmPointY] = l_uv.y;
+
+    //     MTHLog("%f %f %f (%f %f)", glm::length(old_uv), old_uv.x, old_uv.y, l_uv.x, l_uv.y);
+    // }
 
     // Thumb Middle
     {
@@ -194,6 +216,8 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
             }
         }
     }
+
+    // 排除一些手势识别
 
     if (f_result[HG_ThumbCrossTouch] > 0.0f) {
 

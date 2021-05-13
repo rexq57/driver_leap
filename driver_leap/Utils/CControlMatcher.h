@@ -11,8 +11,12 @@ public:
 
         CT_KeyDown_B,
 
+        CT_ThumbPress,
+        CT_ThumbPressX,
+        CT_ThumbPressY,
+
         CT_Count
     };
 
-    static void GetGestures(std::vector<float> &f_gestures, std::vector<bool> &f_result);
+    static void GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f_gestures, std::vector<float> &f_result);
 };

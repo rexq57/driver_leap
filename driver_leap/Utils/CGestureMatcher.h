@@ -18,6 +18,9 @@ public:
         HG_Grab,
         HG_ThumbPress,
 
+        HG_ThumbPressX,
+        HG_ThumbPressY,
+
         HG_ThumbMiddleTouch,
         HG_ThumbPinkyTouch,
 

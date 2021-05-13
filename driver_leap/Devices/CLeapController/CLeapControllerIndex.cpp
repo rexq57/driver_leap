@@ -301,9 +301,9 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
     if(f_hand)
     {
         std::vector<float> l_gestures;
-        std::vector<bool> l_controls;
+        std::vector<float> l_controls;
         CGestureMatcher::GetGestures(f_hand, l_gestures, f_oppHand);
-        CControlMatcher::GetGestures(l_gestures, l_controls);
+        CControlMatcher::GetGestures(f_hand, l_gestures, l_controls);
 
 
         m_buttons[IB_TriggerValue]->SetValue(l_gestures[CGestureMatcher::HG_Trigger]);
@@ -313,18 +313,33 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         m_buttons[IB_GripTouch]->SetState(l_gestures[CGestureMatcher::HG_Grab] >= 0.25f);
         m_buttons[IB_GripForce]->SetValue((l_gestures[CGestureMatcher::HG_Grab] >= 0.75f) ? (l_gestures[CGestureMatcher::HG_Grab] - 0.75f) * 4.f : 0.f);
 
-        m_buttons[IB_TrackpadTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f);
-        m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.5f) *2.f : 0.f);
-        if(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f)
+        // m_buttons[IB_TrackpadTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f);
+        // m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.5f) *2.f : 0.f);
+        // if(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f)
+        // {
+        //     m_buttons[IB_TrackpadX]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointX]);
+        //     m_buttons[IB_TrackpadY]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointY]);
+        // }
+        // else
+        // {
+        //     m_buttons[IB_TrackpadX]->SetValue(0.f);
+        //     m_buttons[IB_TrackpadY]->SetValue(0.f);
+        // }
+
+        m_buttons[IB_TrackpadTouch]->SetState(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f);
+        m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.75f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.75f) *4.f : 0.f);
+        if(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f)
         {
-            m_buttons[IB_TrackpadX]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointX]);
-            m_buttons[IB_TrackpadY]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointY]);
+            m_buttons[IB_TrackpadX]->SetValue(l_controls[CControlMatcher::CT_ThumbPressX]);
+            m_buttons[IB_TrackpadY]->SetValue(l_controls[CControlMatcher::CT_ThumbPressY]);
         }
         else
         {
             m_buttons[IB_TrackpadX]->SetValue(0.f);
             m_buttons[IB_TrackpadY]->SetValue(0.f);
         }
+
+        
 
         //m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.5f);
         //m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.75f);
@@ -342,11 +357,11 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
             // m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.5f);
             // m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.75f);
 
-            m_buttons[IB_BTouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_B]);
-            m_buttons[IB_BClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_B]);
+            m_buttons[IB_BTouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_B] == 1.0f);
+            m_buttons[IB_BClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_B] == 1.0f);
             
-            m_buttons[IB_ATouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_A]);
-            m_buttons[IB_AClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_A]);
+            m_buttons[IB_ATouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_A] == 1.0f);
+            m_buttons[IB_AClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_A] == 1.0f);
             
         }
 
