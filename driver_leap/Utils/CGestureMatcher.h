@@ -24,6 +24,8 @@ public:
         HG_ThumbMiddleTouch,
         HG_ThumbPinkyTouch,
 
+        HG_ThumbIndexTouch,
+
         // Two-handed gesture
         HG_Timeout,
         HG_OpisthenarTouch,

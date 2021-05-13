@@ -327,7 +327,7 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         // }
 
         m_buttons[IB_TrackpadTouch]->SetState(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f);
-        m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.75f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.75f) *4.f : 0.f);
+        m_buttons[IB_TrackpadForce]->SetState((l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f) ? (l_controls[CControlMatcher::CT_ThumbPress] - 0.75f) *4.f : 0.f);
         if(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f)
         {
             m_buttons[IB_TrackpadX]->SetValue(l_controls[CControlMatcher::CT_ThumbPressX]);
@@ -365,8 +365,12 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
             
         }
 
-        m_buttons[IB_ThumbstickTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.5f);
-        m_buttons[IB_ThumbstickClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.75f);
+        // m_buttons[IB_ThumbstickTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.5f);
+        // m_buttons[IB_ThumbstickClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.75f);
+        m_buttons[IB_ThumbstickTouch]->SetState(l_controls[CControlMatcher::CT_RockerPress] >= 0.75f);
+        m_buttons[IB_ThumbstickClick]->SetState((l_controls[CControlMatcher::CT_RockerPress] >= 0.75f) ? (l_controls[CControlMatcher::CT_RockerPress] - 0.75f) *4.f : 0.f);
+        m_buttons[IB_ThumbstickX]->SetValue(l_controls[CControlMatcher::CT_RockerX]);
+        m_buttons[IB_ThumbstickY]->SetValue(l_controls[CControlMatcher::CT_RockerY]);
 
         m_buttons[IB_FingerIndex]->SetValue(l_gestures[CGestureMatcher::HG_IndexBend]);
         m_buttons[IB_FingerMiddle]->SetValue(l_gestures[CGestureMatcher::HG_MiddleBend]);

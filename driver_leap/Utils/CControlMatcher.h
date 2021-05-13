@@ -15,6 +15,10 @@ public:
         CT_ThumbPressX,
         CT_ThumbPressY,
 
+        CT_RockerPress,
+        CT_RockerX,
+        CT_RockerY,
+
         CT_Count
     };
 

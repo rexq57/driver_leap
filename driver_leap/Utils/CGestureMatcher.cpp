@@ -91,14 +91,14 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
 
     // Simple gestures
     float now_value = f_result[HG_IndexBend];
-    f_result[HG_Trigger] = now_value;
-    // if (fast_moving && now_value <= 0.1f && lastHG_Trigger >= 0.1f) {
-    //     f_result[HG_Trigger] = 0.1f;
-    // }
-    // else {
-    //     f_result[HG_Trigger] = now_value;
-    // }
-    // lastHG_Trigger = f_result[HG_Trigger];
+    // f_result[HG_Trigger] = now_value;
+    if (fast_moving && now_value <= 0.1f && lastHG_Trigger >= 0.1f) {
+        f_result[HG_Trigger] = 0.1f;
+    }
+    else {
+        f_result[HG_Trigger] = now_value;
+    }
+    lastHG_Trigger = f_result[HG_Trigger];
 
 
     f_result[HG_Grab] = NormalizeRange((l_fingerBend[2U] + l_fingerBend[3U] + l_fingerBend[4U]) / 3.f, g_piHalf, g_pi);
@@ -151,6 +151,13 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         // lastHG_ThumbMiddleTouch = f_result[HG_ThumbMiddleTouch];
 
         //MTHLog("A %f %f (%f) (%f,%f,%f) %d %d ", f_result[HG_ThumbMiddleTouch], now_value, Length3D(f_hand->palm.velocity.v), f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z, Length3D(f_hand->palm.velocity.v) > 300.0f, now_value < 0.0f);
+    }
+
+    // Thumb Ring Root
+    {
+        glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
+        glm::vec3 l_end(f_hand->index.metacarpal.next_joint.x, f_hand->index.metacarpal.next_joint.y, f_hand->index.metacarpal.next_joint.z);
+        f_result[HG_ThumbIndexTouch] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);
     }
 
     // Thumb Pinky
