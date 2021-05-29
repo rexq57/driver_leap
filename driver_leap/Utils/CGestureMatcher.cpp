@@ -121,7 +121,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
     //     l_uv /= 25.0f;
 
     //     glm::vec2 old_uv = l_uv;
-
+ 
     //     if(glm::length(l_uv) > 1.f)
     //         l_uv = glm::normalize(l_uv);
 
@@ -138,27 +138,22 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         float l_length = glm::distance(l_start, l_end);
         float now_value = (l_length <= 50.f) ? std::min((50.f - l_length) / 20.f, 1.f) : 0.f;
 
-        f_result[HG_ThumbMiddleTouch] = now_value;
+        // f_result[HG_ThumbMiddleTouch] = now_value;
 
         // MTHLog("fuck %f", l_length);
         // �����ٶȣ�����һ�εĲ���
-        // if (fast_moving && now_value <= 0.5f && lastHG_ThumbMiddleTouch >= 0.5f) {
-        //     f_result[HG_ThumbMiddleTouch] = 0.5f;
-        //     //MTHLog("fuck last %f %f", lastHG_ThumbMiddleTouch, Length3D(f_hand->palm.velocity.v) / 10000.0f);
-        // } else {
-        //     f_result[HG_ThumbMiddleTouch] = now_value;
-        // }
-        // lastHG_ThumbMiddleTouch = f_result[HG_ThumbMiddleTouch];
+        if (fast_moving && now_value <= 0.5f && lastHG_ThumbMiddleTouch >= 0.5f) {
+            f_result[HG_ThumbMiddleTouch] = 0.5f;
+            //MTHLog("fuck last %f %f", lastHG_ThumbMiddleTouch, Length3D(f_hand->palm.velocity.v) / 10000.0f);
+        } else {
+            f_result[HG_ThumbMiddleTouch] = now_value;
+        }
+        lastHG_ThumbMiddleTouch = f_result[HG_ThumbMiddleTouch];
 
         //MTHLog("A %f %f (%f) (%f,%f,%f) %d %d ", f_result[HG_ThumbMiddleTouch], now_value, Length3D(f_hand->palm.velocity.v), f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z, Length3D(f_hand->palm.velocity.v) > 300.0f, now_value < 0.0f);
     }
 
-    // Thumb Ring Root
-    {
-        glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
-        glm::vec3 l_end(f_hand->index.metacarpal.next_joint.x, f_hand->index.metacarpal.next_joint.y, f_hand->index.metacarpal.next_joint.z);
-        f_result[HG_ThumbIndexTouch] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);
-    }
+    
 
     // Thumb Pinky
     {
@@ -167,21 +162,32 @@ void CGestureMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
         float l_length = glm::distance(l_start, l_end);
         float now_value = (l_length <= 50.f) ? std::min((50.f - l_length) / 20.f, 1.f) : 0.f;
 
-        f_result[HG_ThumbPinkyTouch] = now_value;
+        // f_result[HG_ThumbPinkyTouch] = now_value;
 
-        // if (fast_moving && now_value <= 0.5f && lastHG_ThumbPinkyTouch >= 0.5f) {
-        //     f_result[HG_ThumbPinkyTouch] = 0.5f;
-        // }
-        // else {
-        //     f_result[HG_ThumbPinkyTouch] = now_value;
-        // }
-        // lastHG_ThumbPinkyTouch = f_result[HG_ThumbPinkyTouch];
+        if (fast_moving && now_value <= 0.5f && lastHG_ThumbPinkyTouch >= 0.5f) {
+            f_result[HG_ThumbPinkyTouch] = 0.5f;
+        }
+        else {
+            f_result[HG_ThumbPinkyTouch] = now_value;
+        }
+        lastHG_ThumbPinkyTouch = f_result[HG_ThumbPinkyTouch];
     }
 
 
     // Two-handed gestures
     if(f_oppHand)
     {
+        // Thumb Ring Root
+        if (f_result[HG_Grab] > 0.0f)
+        {
+            glm::vec3 l_start(f_oppHand->thumb.distal.next_joint.x, f_oppHand->thumb.distal.next_joint.y, f_oppHand->thumb.distal.next_joint.z);
+            glm::vec3 l_end(f_oppHand->index.metacarpal.next_joint.x, f_oppHand->index.metacarpal.next_joint.y, f_oppHand->index.metacarpal.next_joint.z);
+            f_result[HG_ThumbIndexTouch] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);
+        }
+
+
+
+
         l_start = glm::vec3(f_oppHand->index.distal.next_joint.x, f_oppHand->index.distal.next_joint.y, f_oppHand->index.distal.next_joint.z);
         l_end = glm::vec3(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
         f_result[HG_ThumbCrossTouch] = NormalizeRange(glm::distance(l_start, l_end), 35.f, 20.f);

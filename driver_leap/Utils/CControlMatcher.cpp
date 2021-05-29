@@ -33,7 +33,7 @@ void CControlMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
 
         glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
         
-        if (last_result[CT_ThumbPress] == 0.0f) {
+        if (last_result[CT_ThumbPressX] == 0.0f && last_result[CT_ThumbPressY] == 0.0f) {
             last_ThumbPressX = l_start.x;
             last_ThumbPressY = l_start.y;
             // MTHLog("%f %f %f", l_start.x, l_start.y, l_start.z);
@@ -70,19 +70,19 @@ void CControlMatcher::GetGestures(const LEAP_HAND *f_hand, std::vector<float> &f
 
     } else if(f_gestures[CGestureMatcher::HG_ThumbPress] <= 0.25f) {
 
-        last_result[CT_ThumbPressX] = 0;
-        last_result[CT_ThumbPressY] = 0;
+        last_result[CT_ThumbPressX] = 0.0f;
+        last_result[CT_ThumbPressY] = 0.0f;
 
         last_result[CT_ThumbPress] = 0.0f;
     }
 
     // 摇杆模拟
     {
-        if (f_gestures[CGestureMatcher::HG_ThumbIndexTouch] >= 0.5) {
+        if (f_gestures[CGestureMatcher::HG_ThumbIndexTouch] >= 0.75) {
 
             glm::vec3 l_start(f_hand->thumb.distal.next_joint.x, f_hand->thumb.distal.next_joint.y, f_hand->thumb.distal.next_joint.z);
 
-            if (last_result[CT_RockerPress] == 0.0f) {
+            if (last_result[CT_RockerX] == 0.0f && last_result[CT_RockerY] == 0.0f) {
                 last_RockerPressX = l_start.x;
                 last_RockerPressY = l_start.y;
             }

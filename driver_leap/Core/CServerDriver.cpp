@@ -144,7 +144,7 @@ void CServerDriver::RunFrame()
             if(m_controllers[i]) m_controllers[i]->SetEnabled(m_connectionState);
         }
     }
-
+        
     LEAP_HAND *l_hands[LCH_Count] = { nullptr };
     if(m_connectionState)
     {
