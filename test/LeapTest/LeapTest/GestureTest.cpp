@@ -5,6 +5,19 @@
 
 #define TEST_OPEN
 
+LEAP_VECTOR GetVector(const LEAP_HAND* f_hand, Position pos) {
+	LEAP_VECTOR vector_array[] = {
+		f_hand->thumb.distal.next_joint,
+		f_hand->index.distal.next_joint,
+		f_hand->middle.distal.next_joint,
+		f_hand->ring.distal.next_joint,
+		f_hand->pinky.distal.next_joint,
+		f_hand->palm.position
+	};
+
+	return vector_array[pos];
+}
+
 float Distance(const std::vector<LEAP_VECTOR>& vecList, const LEAP_VECTOR& vec2) {
 
 	float result = 0;
@@ -22,32 +35,19 @@ float Distance(const std::vector<LEAP_VECTOR>& vecList, const LEAP_VECTOR& vec2)
 	return result;
 }
 
+float DistanceNormalization(const LEAP_VECTOR& vec1, const LEAP_VECTOR& vec2, float min, float max) {
+
+	float length = Distance({ vec1 }, vec2);
+	float value = (Distance({ vec1 }, vec2) - min) / (max - min);
+	return fminf(fmaxf(1.0f - value, 0.0f), 1.0f);
+}
+
 float Distance3D(const float x[3])
 {
 	return sqrtf(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
 }
 
-enum Position {
-	P_Thumb,
-	P_Index,
-	P_Middle,
-	P_Ring,
-	P_Pinky,
-	P_Palm
-};
 
-static LEAP_VECTOR GetVector(const LEAP_HAND* f_hand, Position pos) {
-	LEAP_VECTOR vector_array[] = {
-		f_hand->thumb.distal.next_joint,
-		f_hand->index.distal.next_joint,
-		f_hand->middle.distal.next_joint,
-		f_hand->ring.distal.next_joint,
-		f_hand->pinky.distal.next_joint,
-		f_hand->palm.position
-	};
-
-	return vector_array[pos];
-}
 
 static LEAP_VECTOR GetCenter(const LEAP_HAND* f_hand, const std::vector<Position>& positions) {
 
@@ -132,6 +132,17 @@ bool DistanceLimit(const LEAP_HAND* f_hand, std::vector<DistanceRule>& dis_rules
 	return result;
 }
 
+float Distance(const LEAP_HAND* f_hand, Position pos1, Position pos2) {
+
+	const LEAP_VECTOR& vec1 = GetVector(f_hand, pos1);
+	const LEAP_VECTOR& vec2 = GetVector(f_hand, pos2);
+	glm::vec3 l_start(vec1.x, vec1.y, vec1.z);
+	glm::vec3 l_end(vec2.x, vec2.y, vec2.z);
+	float l_length = glm::distance(l_start, l_end);
+
+	return l_length;
+}
+
 
 class Gesture {
 
@@ -141,7 +152,7 @@ public:
 		this->handGesture = handGesture;
 	}
 
-	bool check(const LEAP_HAND* f_hand, float* value=0) {
+	bool check(const LEAP_HAND* f_hand, const LEAP_HAND* f_oppHand, float* value=0) {
 
 		bool result = true;
 		
@@ -191,6 +202,30 @@ public:
 			// 计算四个手指的范围
 			result = DistanceLimit(f_hand, dis_rules);
 		}
+		else if (CGestureMatcher::HG_IndexTouch == handGesture) {
+			std::vector<DistanceRule> dis_rules = {
+				DistanceRule(P_Index, P_Thumb, 10, 40),
+				DistanceRule(P_Middle, P_Palm, 69, 116),
+				DistanceRule(P_Ring, P_Palm, 67.60, 114),
+				DistanceRule(P_Pinky, P_Palm, 65, 101),
+			};
+
+			//printf("%f \n", Distance(f_hand, P_Index, P_Thumb));
+
+			// 计算四个手指的范围
+			result = DistanceLimit(f_hand, dis_rules);
+		}
+		else if (CGestureMatcher::HG_PinkyTouch == handGesture) {
+			std::vector<DistanceRule> dis_rules = {
+				//DistanceRule(P_Index, P_Palm, 65, 112),
+				//DistanceRule(P_Middle, P_Palm, 69, 116),
+				//DistanceRule(P_Ring, P_Palm, 67.60, 114),
+				DistanceRule(P_Pinky, P_Thumb, 10, 40),
+			};
+
+			// 计算四个手指的范围
+			result = DistanceLimit(f_hand, dis_rules);
+		}
 		else {
 			assert(!"error");
 		}
@@ -220,24 +255,19 @@ private:
 };
 
 
-bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGesture) {
+bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGesture, const LEAP_HAND* f_oppHand) {
 
 	bool result = false;
 	
 	Gesture gesture_emptyhold = Gesture(handGesture);
-	result = gesture_emptyhold.check(f_hand);
+	result = gesture_emptyhold.check(f_hand, f_oppHand);
 
 	return result;
 }
 
-float DistanceNormalization(const LEAP_VECTOR& vec1, const LEAP_VECTOR& vec2, float min, float max) {
 
-	float length = Distance({ vec1 }, vec2);
-	float value = (Distance({ vec1 }, vec2) - min) / (max - min);
-	return fminf(fmaxf(1.0f - value, 0.0f), 1.0f);
-}
 
-float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub handGesture) {
+float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub handGesture, const LEAP_HAND* f_oppHand) {
 
 	if (CGestureMatcher::HGS_Hold == handGesture) {
 		// 计算4指中心距离手心的距离
@@ -260,6 +290,18 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 
 		return DistanceNormalization(vec1, vec2, 60, 90);
+	}
+	else if (CGestureMatcher::HGS_PalmTouch == handGesture) {
+		if (f_hand && f_oppHand) {
+
+			auto vec1 = GetVector(f_hand, P_Index);
+			auto vec2 = GetVector(f_oppHand, P_Palm);
+
+			printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
+
+			// 计算四个手指的范围
+			return DistanceNormalization(vec1, vec2, 20, 40);
+		}
 	}
 	else {
 		assert(!"error");
