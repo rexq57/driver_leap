@@ -3,13 +3,13 @@
 
 #include <iostream>
 #include <vector>
+#include "CGestureMatcher.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     #include <LeapC.h>
     #include "ExampleConnection.h"
-    #include "CGestureMatcher.h"
 #ifdef __cplusplus
 }
 #endif
@@ -39,7 +39,8 @@ extern "C" {
 
 void onFrame(const LEAP_TRACKING_EVENT* tracking_event) {
 
-    std::vector<float> f_result;
+    std::map<CGestureMatcher::HandGesture, bool> gestures;
+    std::vector<float> values;
     {
         const int LCH_Count = 2;
         LEAP_HAND* l_hands[LCH_Count] = { nullptr };
@@ -55,9 +56,17 @@ void onFrame(const LEAP_TRACKING_EVENT* tracking_event) {
         // Update devices
         for (size_t i = 0U; i < LCH_Count; i++)
         {
-            CGestureMatcher::GetGestures(l_hands[i], f_result, l_hands[(i + 1) % LCH_Count]);
+            CGestureMatcher::GetGestures(l_hands[i], gestures, values, l_hands[(i + 1) % LCH_Count]);
         }
     }
+
+    printf("[gestures] HG_EmptyHold %d HG_SolidHold %d HG_Point %d HGS_Hold %f HGS_Trigger %f\n", 
+        (int)gestures[CGestureMatcher::HG_EmptyHold],
+        (int)gestures[CGestureMatcher::HG_SolidHold],
+        (int)gestures[CGestureMatcher::HG_Point],
+        values[CGestureMatcher::HGS_Hold],
+        values[CGestureMatcher::HGS_Trigger]
+        );
 
     //std::cout << "on frame" << std::endl;
 }

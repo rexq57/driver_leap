@@ -5,7 +5,6 @@
 #include "Devices/CLeapController/CControllerButton.h"
 #include "Core/CDriverConfig.h"
 #include "Utils/CGestureMatcher.h"
-#include "Utils/CControlMatcher.h"
 #include "Utils/Utils.h"
 
 extern const glm::mat4 g_identityMatrix;
@@ -300,141 +299,141 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
 {
     if(f_hand)
     {
-        std::vector<float> l_gestures;
-        std::vector<float> l_controls;
-        CGestureMatcher::GetGestures(f_hand, l_gestures, f_oppHand);
-        CControlMatcher::GetGestures(f_hand, l_gestures, l_controls);
+        std::map<CGestureMatcher::HandGesture, bool> gestures;
+        std::vector<float> values;
+        CGestureMatcher::GetGestures(f_hand, gestures, values, f_oppHand);
+        //CControlMatcher::GetGestures(f_hand, l_gestures, l_controls);
 
 
-        m_buttons[IB_TriggerValue]->SetValue(l_gestures[CGestureMatcher::HG_Trigger]);
-        m_buttons[IB_TriggerClick]->SetState(l_gestures[CGestureMatcher::HG_Trigger] >= 0.6f);
+        m_buttons[IB_TriggerValue]->SetValue(values[CGestureMatcher::HGS_Trigger]);
+        m_buttons[IB_TriggerClick]->SetState(values[CGestureMatcher::HGS_Trigger] >= 1.0f);
 
-        m_buttons[IB_GripValue]->SetValue(l_gestures[CGestureMatcher::HG_Grab]);
-        m_buttons[IB_GripTouch]->SetState(l_gestures[CGestureMatcher::HG_Grab] >= 0.25f);
-        m_buttons[IB_GripForce]->SetValue((l_gestures[CGestureMatcher::HG_Grab] >= 0.75f) ? (l_gestures[CGestureMatcher::HG_Grab] - 0.75f) * 4.f : 0.f);
+        m_buttons[IB_GripValue]->SetValue(values[CGestureMatcher::HGS_Hold]);
+        m_buttons[IB_GripTouch]->SetState(gestures[CGestureMatcher::HG_EmptyHold]);
+        m_buttons[IB_GripForce]->SetValue(gestures[CGestureMatcher::HG_SolidHold]);
 
-        // m_buttons[IB_TrackpadTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f);
-        // m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.5f) *2.f : 0.f);
-        // if(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f)
-        // {
-        //     m_buttons[IB_TrackpadX]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointX]);
-        //     m_buttons[IB_TrackpadY]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointY]);
-        // }
-        // else
-        // {
-        //     m_buttons[IB_TrackpadX]->SetValue(0.f);
-        //     m_buttons[IB_TrackpadY]->SetValue(0.f);
-        // }
+        //// m_buttons[IB_TrackpadTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f);
+        //// m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.5f) *2.f : 0.f);
+        //// if(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f)
+        //// {
+        ////     m_buttons[IB_TrackpadX]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointX]);
+        ////     m_buttons[IB_TrackpadY]->SetValue(l_gestures[CGestureMatcher::HG_PalmPointY]);
+        //// }
+        //// else
+        //// {
+        ////     m_buttons[IB_TrackpadX]->SetValue(0.f);
+        ////     m_buttons[IB_TrackpadY]->SetValue(0.f);
+        //// }
 
-        m_buttons[IB_TrackpadTouch]->SetState(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f);
-        m_buttons[IB_TrackpadForce]->SetState((l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f) ? (l_controls[CControlMatcher::CT_ThumbPress] - 0.75f) *4.f : 0.f);
-        if(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f)
-        {
-            m_buttons[IB_TrackpadX]->SetValue(l_controls[CControlMatcher::CT_ThumbPressX]);
-            m_buttons[IB_TrackpadY]->SetValue(l_controls[CControlMatcher::CT_ThumbPressY]);
-        }
-        else
-        {
-            m_buttons[IB_TrackpadX]->SetValue(0.f);
-            m_buttons[IB_TrackpadY]->SetValue(0.f);
-        }
+        //m_buttons[IB_TrackpadTouch]->SetState(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f);
+        //m_buttons[IB_TrackpadForce]->SetState((l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f) ? (l_controls[CControlMatcher::CT_ThumbPress] - 0.75f) *4.f : 0.f);
+        //if(l_controls[CControlMatcher::CT_ThumbPress] >= 0.75f)
+        //{
+        //    m_buttons[IB_TrackpadX]->SetValue(l_controls[CControlMatcher::CT_ThumbPressX]);
+        //    m_buttons[IB_TrackpadY]->SetValue(l_controls[CControlMatcher::CT_ThumbPressY]);
+        //}
+        //else
+        //{
+        //    m_buttons[IB_TrackpadX]->SetValue(0.f);
+        //    m_buttons[IB_TrackpadY]->SetValue(0.f);
+        //}
 
-        
+        //
 
-        //m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.5f);
-        //m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.75f);
-        //m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
-        //m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
-        //m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.5f);
-        //m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.75f);
-        {
-            m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
-            m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
+        ////m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.5f);
+        ////m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.75f);
+        ////m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
+        ////m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
+        ////m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.5f);
+        ////m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_MiddleCrossTouch] >= 0.75f);
+        //{
+        //    m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.5f);
+        //    m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_PalmTouch] >= 0.75f);
 
-            // m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.5f);
-            // m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.75f);
+        //    // m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.5f);
+        //    // m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.75f);
 
-            // m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.5f);
-            // m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.75f);
+        //    // m_buttons[IB_ATouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.5f);
+        //    // m_buttons[IB_AClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbMiddleTouch] >= 0.75f);
 
-            m_buttons[IB_BTouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_B] == 1.0f);
-            m_buttons[IB_BClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_B] == 1.0f);
-            
-            m_buttons[IB_ATouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_A] == 1.0f);
-            m_buttons[IB_AClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_A] == 1.0f);
-            
-        }
+        //    m_buttons[IB_BTouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_B] == 1.0f);
+        //    m_buttons[IB_BClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_B] == 1.0f);
+        //    
+        //    m_buttons[IB_ATouch]->SetState(l_controls[CControlMatcher::CT_KeyDown_A] == 1.0f);
+        //    m_buttons[IB_AClick]->SetState(l_controls[CControlMatcher::CT_KeyDown_A] == 1.0f);
+        //    
+        //}
 
-        // m_buttons[IB_ThumbstickTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.5f);
-        // m_buttons[IB_ThumbstickClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.75f);
-        m_buttons[IB_ThumbstickTouch]->SetState(l_controls[CControlMatcher::CT_RockerPress] >= 0.75f);
-        m_buttons[IB_ThumbstickClick]->SetState((l_controls[CControlMatcher::CT_RockerPress] >= 0.75f) ? (l_controls[CControlMatcher::CT_RockerPress] - 0.75f) *4.f : 0.f);
-        m_buttons[IB_ThumbstickX]->SetValue(l_controls[CControlMatcher::CT_RockerX]);
-        m_buttons[IB_ThumbstickY]->SetValue(l_controls[CControlMatcher::CT_RockerY]);
+        //// m_buttons[IB_ThumbstickTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.5f);
+        //// m_buttons[IB_ThumbstickClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbCrossTouch] >= 0.75f);
+        //m_buttons[IB_ThumbstickTouch]->SetState(l_controls[CControlMatcher::CT_RockerPress] >= 0.75f);
+        //m_buttons[IB_ThumbstickClick]->SetState((l_controls[CControlMatcher::CT_RockerPress] >= 0.75f) ? (l_controls[CControlMatcher::CT_RockerPress] - 0.75f) *4.f : 0.f);
+        //m_buttons[IB_ThumbstickX]->SetValue(l_controls[CControlMatcher::CT_RockerX]);
+        //m_buttons[IB_ThumbstickY]->SetValue(l_controls[CControlMatcher::CT_RockerY]);
 
-        m_buttons[IB_FingerIndex]->SetValue(l_gestures[CGestureMatcher::HG_IndexBend]);
-        m_buttons[IB_FingerMiddle]->SetValue(l_gestures[CGestureMatcher::HG_MiddleBend]);
-        m_buttons[IB_FingerRing]->SetValue(l_gestures[CGestureMatcher::HG_RingBend]);
-        m_buttons[IB_FingerPinky]->SetValue(l_gestures[CGestureMatcher::HG_PinkyBend]);
+        //m_buttons[IB_FingerIndex]->SetValue(l_gestures[CGestureMatcher::HG_IndexBend]);
+        //m_buttons[IB_FingerMiddle]->SetValue(l_gestures[CGestureMatcher::HG_MiddleBend]);
+        //m_buttons[IB_FingerRing]->SetValue(l_gestures[CGestureMatcher::HG_RingBend]);
+        //m_buttons[IB_FingerPinky]->SetValue(l_gestures[CGestureMatcher::HG_PinkyBend]);
 
-        for(size_t i = 0U; i < 5U; i++)
-        {
-            const LEAP_DIGIT &l_finger = f_hand->digits[i];
-            size_t l_transformIndex = GetFingerBoneIndex(i);
-            if(l_transformIndex != HSB_Thumb0) l_transformIndex++;
+        //for(size_t i = 0U; i < 5U; i++)
+        //{
+        //    const LEAP_DIGIT &l_finger = f_hand->digits[i];
+        //    size_t l_transformIndex = GetFingerBoneIndex(i);
+        //    if(l_transformIndex != HSB_Thumb0) l_transformIndex++;
 
-            LEAP_QUATERNION l_leapRotation = f_hand->palm.orientation;
-            glm::quat l_segmentRotation;
-            ConvertQuaternion(l_leapRotation, l_segmentRotation);
+        //    LEAP_QUATERNION l_leapRotation = f_hand->palm.orientation;
+        //    glm::quat l_segmentRotation;
+        //    ConvertQuaternion(l_leapRotation, l_segmentRotation);
 
-            for(size_t j = 1U; j < 4U; j++)
-            {
-                const glm::quat l_prevSegmentRotationInv = glm::inverse(l_segmentRotation);
-                l_leapRotation = l_finger.bones[j].rotation;
-                ConvertQuaternion(l_leapRotation, l_segmentRotation);
+        //    for(size_t j = 1U; j < 4U; j++)
+        //    {
+        //        const glm::quat l_prevSegmentRotationInv = glm::inverse(l_segmentRotation);
+        //        l_leapRotation = l_finger.bones[j].rotation;
+        //        ConvertQuaternion(l_leapRotation, l_segmentRotation);
 
-                glm::quat l_segmentResult = l_prevSegmentRotationInv*l_segmentRotation;
-                ChangeBoneOrientation(l_segmentResult);
-                if(l_transformIndex == HSB_Thumb0)
-                {
-                    std::swap(l_segmentResult.z, l_segmentResult.w);
-                    l_segmentResult.w *= -1.f;
-                    if(m_hand == CH_Right)
-                    {
-                        std::swap(l_segmentResult.x, l_segmentResult.w);
-                        l_segmentResult.w *= -1.f;
-                        std::swap(l_segmentResult.y, l_segmentResult.z);
-                        l_segmentResult.y *= -1.f;
-                    }
-                }
-                ConvertQuaternion(l_segmentResult, m_boneTransform[l_transformIndex].orientation);
-                l_transformIndex++;
-            }
-        }
+        //        glm::quat l_segmentResult = l_prevSegmentRotationInv*l_segmentRotation;
+        //        ChangeBoneOrientation(l_segmentResult);
+        //        if(l_transformIndex == HSB_Thumb0)
+        //        {
+        //            std::swap(l_segmentResult.z, l_segmentResult.w);
+        //            l_segmentResult.w *= -1.f;
+        //            if(m_hand == CH_Right)
+        //            {
+        //                std::swap(l_segmentResult.x, l_segmentResult.w);
+        //                l_segmentResult.w *= -1.f;
+        //                std::swap(l_segmentResult.y, l_segmentResult.z);
+        //                l_segmentResult.y *= -1.f;
+        //            }
+        //        }
+        //        ConvertQuaternion(l_segmentResult, m_boneTransform[l_transformIndex].orientation);
+        //        l_transformIndex++;
+        //    }
+        //}
 
-        // Update aux bones
-        glm::vec3 l_position;
-        glm::quat l_rotation;
-        ConvertVector3(m_boneTransform[HSB_Wrist].position, l_position);
-        ConvertQuaternion(m_boneTransform[HSB_Wrist].orientation, l_rotation);
-        const glm::mat4 l_wristMat = glm::translate(g_identityMatrix, l_position) * glm::mat4_cast(l_rotation);
+        //// Update aux bones
+        //glm::vec3 l_position;
+        //glm::quat l_rotation;
+        //ConvertVector3(m_boneTransform[HSB_Wrist].position, l_position);
+        //ConvertQuaternion(m_boneTransform[HSB_Wrist].orientation, l_rotation);
+        //const glm::mat4 l_wristMat = glm::translate(g_identityMatrix, l_position) * glm::mat4_cast(l_rotation);
 
-        for(size_t i = HF_Thumb; i < HF_Count; i++)
-        {
-            glm::mat4 l_chainMat(l_wristMat);
-            const size_t l_chainIndex = GetFingerBoneIndex(i);
-            for(size_t j = 0U; j < ((i == HF_Thumb) ? 3U : 4U); j++)
-            {
-                ConvertVector3(m_boneTransform[l_chainIndex + j].position, l_position);
-                ConvertQuaternion(m_boneTransform[l_chainIndex + j].orientation, l_rotation);
-                l_chainMat = l_chainMat*(glm::translate(g_identityMatrix, l_position)*glm::mat4_cast(l_rotation));
-            }
-            l_position = l_chainMat*g_zeroPoint;
-            l_rotation = glm::quat_cast(l_chainMat);
-            if(m_hand == CH_Left) ChangeAuxTransformation(l_position, l_rotation);
-            ConvertVector3(l_position, m_boneTransform[HSB_Aux_Thumb + i].position);
-            ConvertQuaternion(l_rotation, m_boneTransform[HSB_Aux_Thumb + i].orientation);
-        }
+        //for(size_t i = HF_Thumb; i < HF_Count; i++)
+        //{
+        //    glm::mat4 l_chainMat(l_wristMat);
+        //    const size_t l_chainIndex = GetFingerBoneIndex(i);
+        //    for(size_t j = 0U; j < ((i == HF_Thumb) ? 3U : 4U); j++)
+        //    {
+        //        ConvertVector3(m_boneTransform[l_chainIndex + j].position, l_position);
+        //        ConvertQuaternion(m_boneTransform[l_chainIndex + j].orientation, l_rotation);
+        //        l_chainMat = l_chainMat*(glm::translate(g_identityMatrix, l_position)*glm::mat4_cast(l_rotation));
+        //    }
+        //    l_position = l_chainMat*g_zeroPoint;
+        //    l_rotation = glm::quat_cast(l_chainMat);
+        //    if(m_hand == CH_Left) ChangeAuxTransformation(l_position, l_rotation);
+        //    ConvertVector3(l_position, m_boneTransform[HSB_Aux_Thumb + i].position);
+        //    ConvertQuaternion(l_rotation, m_boneTransform[HSB_Aux_Thumb + i].orientation);
+        //}
     }
 }
 

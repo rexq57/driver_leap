@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <LeapC.h>
+#include <map>
 
 class CGestureMatcher
 {
@@ -13,8 +14,19 @@ public:
 
         HG_EmptyHold,
         HG_SolidHold,
+
+        HG_Point,
+
+        HG_MAX,
     };
 
-    static void GetGestures(const LEAP_HAND* f_hand, std::vector<float>& f_result, const LEAP_HAND* f_oppHand = nullptr);
+    enum HandGestureSub : size_t {
+
+        HGS_Hold,
+        HGS_Trigger,
+
+        HGS_MAX
+    };
+
+    static void GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture, bool>& gestures, std::vector<float>& values, const LEAP_HAND* f_oppHand = nullptr);
 };
-#pragma once

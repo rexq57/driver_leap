@@ -166,6 +166,7 @@
     <ClInclude Include="ExampleConnection.h" />
     <ClInclude Include="CGestureMatcher.h" />
     <ClInclude Include="GestureTest.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

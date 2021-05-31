@@ -24,9 +24,6 @@
     <ClCompile Include="Devices\CLeapController\CLeapControllerIndex.cpp">
       <Filter>Devices\CLeapController</Filter>
     </ClCompile>
-    <ClCompile Include="Devices\CLeapController\CLeapControllerVive.cpp">
-      <Filter>Devices\CLeapController</Filter>
-    </ClCompile>
     <ClCompile Include="Core\CServerDriver.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -36,10 +33,7 @@
     <ClCompile Include="Core\CDriverConfig.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Devices\CLeapController\CLeapControllerOculus.cpp">
-      <Filter>Devices\CLeapController</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils\CControlMatcher.cpp">
+    <ClCompile Include="Utils\GestureTest.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,9 +57,6 @@
     <ClInclude Include="Devices\CLeapController\CLeapControllerIndex.h">
       <Filter>Devices\CLeapController</Filter>
     </ClInclude>
-    <ClInclude Include="Devices\CLeapController\CLeapControllerVive.h">
-      <Filter>Devices\CLeapController</Filter>
-    </ClInclude>
     <ClInclude Include="Core\CServerDriver.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -75,10 +66,7 @@
     <ClInclude Include="Core\CDriverConfig.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Devices\CLeapController\CLeapControllerOculus.h">
-      <Filter>Devices\CLeapController</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils\CControlMatcher.h">
+    <ClInclude Include="Utils\GestureTest.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

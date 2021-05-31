@@ -2,9 +2,9 @@
 
 #include "Core/CServerDriver.h"
 #include "Core/CLeapPoller.h"
-#include "Devices/CLeapController/CLeapControllerVive.h"
+//#include "Devices/CLeapController/CLeapControllerVive.h"
 #include "Devices/CLeapController/CLeapControllerIndex.h"
-#include "Devices/CLeapController/CLeapControllerOculus.h"
+//#include "Devices/CLeapController/CLeapControllerOculus.h"
 #include "Devices/CLeapStation.h"
 
 #include "Core/CDriverConfig.h"
@@ -63,21 +63,21 @@ vr::EVRInitError CServerDriver::Init(vr::IVRDriverContext *pDriverContext)
 
     switch(CDriverConfig::GetEmulatedController())
     {
-        case CDriverConfig::EC_Vive:
+        /*case CDriverConfig::EC_Vive:
         {
             if(CDriverConfig::IsLeftHandEnabled()) m_controllers[LCH_Left] = new CLeapControllerVive(CLeapController::CH_Left);
             if(CDriverConfig::IsRightHandEnabled()) m_controllers[LCH_Right] = new CLeapControllerVive(CLeapController::CH_Right);
-        } break;
+        } break;*/
         case CDriverConfig::EC_Index:
         {
             if(CDriverConfig::IsLeftHandEnabled()) m_controllers[LCH_Left] = new CLeapControllerIndex(CLeapController::CH_Left);
             if(CDriverConfig::IsRightHandEnabled()) m_controllers[LCH_Right] = new CLeapControllerIndex(CLeapController::CH_Right);
         } break;
-        case CDriverConfig::EC_Oculus:
+        /*case CDriverConfig::EC_Oculus:
         {
             if(CDriverConfig::IsLeftHandEnabled()) m_controllers[LCH_Left] = new CLeapControllerOculus(CLeapController::CH_Left);
             if(CDriverConfig::IsRightHandEnabled()) m_controllers[LCH_Right] = new CLeapControllerOculus(CLeapController::CH_Right);
-        } break;
+        } break;*/
     }
 
     for(size_t i = 0U; i < LCH_Count; i++)

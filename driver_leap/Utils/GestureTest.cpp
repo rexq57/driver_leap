@@ -233,6 +233,7 @@ bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGestu
 float DistanceNormalization(const LEAP_VECTOR& vec1, const LEAP_VECTOR& vec2, float min, float max) {
 
 	float length = Distance({ vec1 }, vec2);
+
 	float value = (Distance({ vec1 }, vec2) - min) / (max - min);
 	return fminf(fmaxf(1.0f - value, 0.0f), 1.0f);
 }
@@ -252,6 +253,16 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 	 	LEAP_VECTOR vec1 = GetCenter(f_hand, positions);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 
+		/*float length = Distance({ vec1 }, vec2);
+
+		printf("[GestureValue::HGS_Hold] %.2f %.2f %.2f %.2f %.2f %.2f %f\n", vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z, length);
+
+		float min = 29;
+		float max = 88;
+
+		float value = (Distance({ vec1 }, vec2) - min) / (max - min);
+		return fminf(fmaxf( 1.0f - value, 0.0f), 1.0f);*/
+
 		return DistanceNormalization(vec1, vec2, 29, 88);
 	}
 	else if (CGestureMatcher::HGS_Trigger == handGesture) {
@@ -259,7 +270,17 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 		LEAP_VECTOR vec1 = GetVector(f_hand, P_Index);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 
-		return DistanceNormalization(vec1, vec2, 60, 90);
+		/*float length = Distance({ vec1 }, vec2);
+
+		printf("[GestureValue::HGS_Trigger] %f\n", length);
+
+		float min = 45;
+		float max = 88;
+
+		float value = (Distance({ vec1 }, vec2) - min) / (max - min);
+		return fminf(fmaxf(1.0f - value, 0.0f), 1.0f);*/
+
+		return DistanceNormalization(vec1, vec2, 55, 90);
 	}
 	else {
 		assert(!"error");

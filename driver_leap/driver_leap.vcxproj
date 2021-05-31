@@ -234,12 +234,10 @@
     <ClInclude Include="Devices\CLeapController\CControllerButton.h" />
     <ClInclude Include="Devices\CLeapController\CLeapController.h" />
     <ClInclude Include="Devices\CLeapController\CLeapControllerIndex.h" />
-    <ClInclude Include="Devices\CLeapController\CLeapControllerOculus.h" />
-    <ClInclude Include="Devices\CLeapController\CLeapControllerVive.h" />
     <ClInclude Include="Devices\CLeapStation.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Utils\CControlMatcher.h" />
     <ClInclude Include="Utils\CGestureMatcher.h" />
+    <ClInclude Include="Utils\GestureTest.h" />
     <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -255,8 +253,6 @@
     <ClCompile Include="Devices\CLeapController\CControllerButton.cpp" />
     <ClCompile Include="Devices\CLeapController\CLeapController.cpp" />
     <ClCompile Include="Devices\CLeapController\CLeapControllerIndex.cpp" />
-    <ClCompile Include="Devices\CLeapController\CLeapControllerOculus.cpp" />
-    <ClCompile Include="Devices\CLeapController\CLeapControllerVive.cpp" />
     <ClCompile Include="Devices\CLeapStation.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -265,8 +261,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Utils\CControlMatcher.cpp" />
     <ClCompile Include="Utils\CGestureMatcher.cpp" />
+    <ClCompile Include="Utils\GestureTest.cpp" />
     <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
