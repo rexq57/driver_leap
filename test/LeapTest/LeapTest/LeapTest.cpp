@@ -60,7 +60,7 @@ void onFrame(const LEAP_TRACKING_EVENT* tracking_event) {
         }
     }
 
-    printf("[gestures] HG_EmptyHold %d HG_SolidHold %d HG_Point %d HG_IndexTouch %d HG_PinkyTouch %d HG_PalmTouch %f HGS_Hold %f HGS_Trigger %f HGS_Touchpad (%.2f, %.2f)\n", 
+    printf("[gestures] HG_EmptyHold %d HG_SolidHold %d HG_Point %d HG_IndexTouch %d HG_PinkyTouch %d HG_PalmTouch %f HGS_Hold %f HGS_Trigger %f HGS_Thumbstick (%.2f, %.2f)\n", 
         (int)gestures[CGestureMatcher::HG_EmptyHold],
         (int)gestures[CGestureMatcher::HG_SolidHold],
         (int)gestures[CGestureMatcher::HG_Point],
@@ -69,8 +69,8 @@ void onFrame(const LEAP_TRACKING_EVENT* tracking_event) {
         values[CGestureMatcher::HGS_PalmTouch],
         values[CGestureMatcher::HGS_Hold],
         values[CGestureMatcher::HGS_Trigger],
-        values[CGestureMatcher::HGS_TouchpadX],
-        values[CGestureMatcher::HGS_TouchpadY]
+        values[CGestureMatcher::HGS_ThumbstickX],
+        values[CGestureMatcher::HGS_ThumbstickY]
         );
 
     //std::cout << "on frame" << std::endl;

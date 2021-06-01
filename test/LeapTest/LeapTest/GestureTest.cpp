@@ -204,7 +204,7 @@ public:
 		}
 		else if (CGestureMatcher::HG_IndexTouch == handGesture) {
 			std::vector<DistanceRule> dis_rules = {
-				DistanceRule(P_Index, P_Thumb, 10, 40),
+				DistanceRule(P_Index, P_Thumb, 10, 30),
 				DistanceRule(P_Middle, P_Palm, 69, 116),
 				DistanceRule(P_Ring, P_Palm, 67.60, 114),
 				DistanceRule(P_Pinky, P_Palm, 65, 101),
@@ -295,12 +295,12 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 		if (f_hand && f_oppHand) {
 
 			auto vec1 = GetVector(f_hand, P_Index);
-			auto vec2 = GetVector(f_oppHand, P_Palm);
+			auto vec2 = GetVector(f_oppHand, P_Index);
 
-			printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
+			//printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
 
 			// 计算四个手指的范围
-			return DistanceNormalization(vec1, vec2, 20, 40);
+			return DistanceNormalization(vec1, vec2, 30, 40);
 		}
 	}
 	else {

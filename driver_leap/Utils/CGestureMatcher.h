@@ -31,25 +31,29 @@ public:
         HGS_Trigger,
         HGS_PalmTouch,
 
-        HGS_TouchpadX,
-        HGS_TouchpadY,
-
         HGS_TrackpadX,
         HGS_TrackpadY,
 
-        
+        HGS_TrackpadClick,
 
-        __HGS_TouchpadX,
-        __HGS_TouchpadY,
+        HGS_ThumbstickX,
+        HGS_ThumbstickY,
 
-        __HGS_TouchpadX2,
-        __HGS_TouchpadY2,
+        HGS_ThumbstickClick,
 
         __HGS_TrackpadX,
         __HGS_TrackpadY,
 
         __HGS_TrackpadX2,
         __HGS_TrackpadY2,
+
+        __HGS_ThumbstickX,
+        __HGS_ThumbstickY,
+
+        __HGS_ThumbstickX2,
+        __HGS_ThumbstickY2,
+
+        __HGS_DisableTrigger,
 
         HGS_MAX,
     };

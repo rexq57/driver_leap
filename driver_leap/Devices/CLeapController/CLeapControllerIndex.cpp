@@ -295,6 +295,8 @@ static float Length3D(const float* x)
     return sqrtf(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
 }
 
+
+
 void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HAND *f_oppHand)
 {
     if(f_hand)
@@ -304,16 +306,25 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         CGestureMatcher::GetGestures(f_hand, gestures, values, f_oppHand);
         //CControlMatcher::GetGestures(f_hand, l_gestures, l_controls);
 
-        bool trackpadTouched = values[CGestureMatcher::HGS_TouchpadX] != 0.0f && values[CGestureMatcher::HGS_TouchpadY] != 0.0f;
-        bool thumbstickTouched = values[CGestureMatcher::HGS_TrackpadX] != 0.0f && values[CGestureMatcher::HGS_TrackpadY] != 0.0f;
-        bool disable_gesture = trackpadTouched || thumbstickTouched;
+        bool trackpadTouched = values[CGestureMatcher::HGS_TrackpadX] != 0.0f && values[CGestureMatcher::HGS_TrackpadY] != 0.0f;
+        bool thumbstickTouched = values[CGestureMatcher::HGS_ThumbstickX] != 0.0f && values[CGestureMatcher::HGS_ThumbstickY] != 0.0f;
+        bool disable_gesture = gestures[CGestureMatcher::__HG_Disable];
 
-        m_buttons[IB_TriggerValue]->SetValue(values[CGestureMatcher::HGS_Trigger] && !disable_gesture);
-        m_buttons[IB_TriggerClick]->SetState(values[CGestureMatcher::HGS_Trigger] >= 1.0f && !disable_gesture);
+#define SET_VALUE(idx, val) m_buttons[idx]->SetValue(disable_gesture ? 0.0f:val);
+#define SET_STATE(idx, val) m_buttons[idx]->SetState(disable_gesture ? false:val);
 
-        m_buttons[IB_GripValue]->SetValue(values[CGestureMatcher::HGS_Hold]);
-        m_buttons[IB_GripTouch]->SetState(gestures[CGestureMatcher::HG_EmptyHold]);
-        m_buttons[IB_GripForce]->SetValue(gestures[CGestureMatcher::HG_SolidHold]);
+        SET_VALUE(IB_TriggerValue, values[CGestureMatcher::HGS_Trigger]);
+        SET_STATE(IB_TriggerClick, values[CGestureMatcher::HGS_Trigger] >= 1.0f);
+        //m_buttons[IB_TriggerValue]->SetValue(values[CGestureMatcher::HGS_Trigger] && !disable_gesture);
+        //m_buttons[IB_TriggerClick]->SetState(values[CGestureMatcher::HGS_Trigger] >= 1.0f && !disable_gesture);
+
+        SET_VALUE(IB_GripValue, values[CGestureMatcher::HGS_Hold]);
+        SET_STATE(IB_GripTouch, gestures[CGestureMatcher::HG_EmptyHold]);
+        SET_VALUE(IB_GripForce, gestures[CGestureMatcher::HG_SolidHold]);
+
+        //m_buttons[IB_GripValue]->SetValue(values[CGestureMatcher::HGS_Hold]);
+        //m_buttons[IB_GripTouch]->SetState(gestures[CGestureMatcher::HG_EmptyHold]);
+        //m_buttons[IB_GripForce]->SetValue(gestures[CGestureMatcher::HG_SolidHold]);
 
         //// m_buttons[IB_TrackpadTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f);
         //// m_buttons[IB_TrackpadForce]->SetState((l_gestures[CGestureMatcher::HG_ThumbPress] >= 0.5f) ? (l_gestures[CGestureMatcher::HG_ThumbPress] - 0.5f) *2.f : 0.f);
@@ -328,32 +339,46 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         ////     m_buttons[IB_TrackpadY]->SetValue(0.f);
         //// }
 
-        
-        m_buttons[IB_TrackpadTouch]->SetState(trackpadTouched);
-        if (trackpadTouched) {
-            m_buttons[IB_TrackpadForce]->SetState(values[CGestureMatcher::HGS_Trigger] >= 1.0f);
-        }
-        m_buttons[IB_TrackpadX]->SetValue(values[CGestureMatcher::HGS_TouchpadX]);
-        m_buttons[IB_TrackpadY]->SetValue(values[CGestureMatcher::HGS_TouchpadY]);
+        SET_STATE(IB_TrackpadTouch, trackpadTouched);
+        SET_STATE(IB_TrackpadForce, values[CGestureMatcher::HGS_TrackpadClick]);
+        SET_VALUE(IB_TrackpadX, values[CGestureMatcher::HGS_TrackpadX]);
+        SET_VALUE(IB_TrackpadY, values[CGestureMatcher::HGS_TrackpadY]);
 
+        //m_buttons[IB_TrackpadTouch]->SetState(trackpadTouched);
+        //m_buttons[IB_TrackpadForce]->SetState(values[CGestureMatcher::HGS_TrackpadClick]);
+        //m_buttons[IB_TrackpadX]->SetValue(values[CGestureMatcher::HGS_TrackpadX]);
+        //m_buttons[IB_TrackpadY]->SetValue(values[CGestureMatcher::HGS_TrackpadY]);
+
+
+        SET_STATE(IB_ThumbstickTouch, thumbstickTouched);
+        SET_STATE(IB_ThumbstickClick, values[CGestureMatcher::HGS_ThumbstickClick]);
+        SET_VALUE(IB_ThumbstickX, values[CGestureMatcher::HGS_ThumbstickX]);
+        SET_VALUE(IB_ThumbstickY, values[CGestureMatcher::HGS_ThumbstickY]);
         
-        m_buttons[IB_ThumbstickTouch]->SetState(thumbstickTouched);
-        if (thumbstickTouched) {
-            m_buttons[IB_ThumbstickClick]->SetState(values[CGestureMatcher::HGS_Trigger] >= 1.0f);
-        }
-        m_buttons[IB_ThumbstickX]->SetValue(values[CGestureMatcher::HGS_TrackpadX]);
-        m_buttons[IB_ThumbstickY]->SetValue(values[CGestureMatcher::HGS_TrackpadY]);
+        //m_buttons[IB_ThumbstickTouch]->SetState(thumbstickTouched);
+        //m_buttons[IB_ThumbstickClick]->SetState(values[CGestureMatcher::HGS_ThumbstickClick]);
+        //m_buttons[IB_ThumbstickX]->SetValue(values[CGestureMatcher::HGS_ThumbstickX]);
+        //m_buttons[IB_ThumbstickY]->SetValue(values[CGestureMatcher::HGS_ThumbstickY]);
 
 
         ////m_buttons[IB_SystemTouch]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.5f);
         ////m_buttons[IB_SystemClick]->SetState(l_gestures[CGestureMatcher::HG_OpisthenarTouch] >= 0.75f);
-        m_buttons[IB_BTouch]->SetState(gestures[CGestureMatcher::HG_IndexTouch] );
-        m_buttons[IB_BClick]->SetState(gestures[CGestureMatcher::HG_IndexTouch] );
-        m_buttons[IB_ATouch]->SetState(gestures[CGestureMatcher::HG_PinkyTouch] );
-        m_buttons[IB_AClick]->SetState(gestures[CGestureMatcher::HG_PinkyTouch] );
+
+        SET_STATE(IB_BTouch, gestures[CGestureMatcher::HG_IndexTouch]);
+        SET_STATE(IB_BClick, gestures[CGestureMatcher::HG_IndexTouch]);
+        SET_STATE(IB_ATouch, gestures[CGestureMatcher::HG_PinkyTouch]);
+        SET_STATE(IB_AClick, gestures[CGestureMatcher::HG_PinkyTouch]);
+
+        //m_buttons[IB_BTouch]->SetState(gestures[CGestureMatcher::HG_IndexTouch] );
+        //m_buttons[IB_BClick]->SetState(gestures[CGestureMatcher::HG_IndexTouch] );
+        //m_buttons[IB_ATouch]->SetState(gestures[CGestureMatcher::HG_PinkyTouch] );
+        //m_buttons[IB_AClick]->SetState(gestures[CGestureMatcher::HG_PinkyTouch] );
         //{
-            m_buttons[IB_SystemTouch]->SetState(values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
-            m_buttons[IB_SystemClick]->SetState(values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
+
+        SET_STATE(IB_SystemTouch, values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
+        SET_STATE(IB_SystemClick, values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
+            //m_buttons[IB_SystemTouch]->SetState(values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
+            //m_buttons[IB_SystemClick]->SetState(values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
 
         //    // m_buttons[IB_BTouch]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.5f);
         //    // m_buttons[IB_BClick]->SetState(l_gestures[CGestureMatcher::HG_ThumbPinkyTouch] >= 0.75f);
