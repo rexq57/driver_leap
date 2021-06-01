@@ -64,7 +64,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 						static_value[i] = 0.0f;
 					}
 
-					printf("reset\n");
+					printf("[%d] reset\n", f_hand->type);
 				}
 			}
 			else {
@@ -105,16 +105,16 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		if (f_oppHand) {
 
 			std::map<HandGesture, bool>& static_gesture2 = static_lr_gestures[f_oppHand->type];
-			std::vector<float>& static_value2 = static_lr_values[f_oppHand->type];
-			if (static_value2.size() == 0) {
-				static_value2.resize(HGS_MAX);
-				for (int i = 0; i < static_value2.size(); i++) {
-					static_value2[i] = 0.0f;
-				}
-			}
+			//std::vector<float>& static_value2 = static_lr_values[f_oppHand->type];
+			//if (static_value2.size() == 0) {
+			//	static_value2.resize(HGS_MAX);
+			//	for (int i = 0; i < static_value2.size(); i++) {
+			//		static_value2[i] = 0.0f;
+			//	}
+			//}
 
-			// 副手食指触摸 + 主手指向
-			if (static_gesture2[HG_EmptyHold]) {
+			// 副手握拳 + 主手指向
+			if (static_gesture2[HG_EmptyHold] || static_gesture2[HG_SolidHold]) {
 				
 				if (static_gesture[HG_Point]) {
 
@@ -122,17 +122,17 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					auto vec = GetVector(f_oppHand, P_Palm);
 					glm::vec3 l_start(vec.x, vec.y, vec.z);
 					
-					if (static_value2[__HGS_TrackpadX] == 0.0f && static_value2[__HGS_TrackpadY] == 0.0f) {
+					if (static_value[__HGS_TrackpadX] == 0.0f && static_value[__HGS_TrackpadY] == 0.0f) {
 
-						// printf("触摸重置 \n");
+						printf("[%d] 触摸重置 \n", f_oppHand->type);
 
-						static_value2[__HGS_TrackpadX] = l_start.x;
-						static_value2[__HGS_TrackpadY] = l_start.y;
+						static_value[__HGS_TrackpadX] = l_start.x;
+						static_value[__HGS_TrackpadY] = l_start.y;
 					}
 					else {
 						// // 计算与中心点的角度
 						const float length = 25.0f;
-						glm::vec2 l_uv(-(l_start.x - static_value2[__HGS_TrackpadX]), l_start.y - static_value2[__HGS_TrackpadY]);
+						glm::vec2 l_uv(-(l_start.x - static_value[__HGS_TrackpadX]), l_start.y - static_value[__HGS_TrackpadY]);
 
 						l_uv /= 25.0f;
 
@@ -141,8 +141,8 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 						if (glm::length(l_uv) > 1.f)
 							l_uv = glm::normalize(l_uv);
 
-						static_value2[__HGS_TrackpadX2] = l_uv.x;
-						static_value2[__HGS_TrackpadY2] = l_uv.y;
+						static_value[HGS_TrackpadX] = l_uv.x;
+						static_value[HGS_TrackpadY] = l_uv.y;
 					}
 
 					// 副手扣动扳机作为触摸板点击
@@ -154,56 +154,64 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			}
 
 			// 副手实心握 + 主手指向
-			if (static_gesture2[HG_SolidHold]) {
+			if (static_gesture[HG_Point]) {
 
-				if (static_gesture[HG_Point]) {
+				if (static_gesture2[HG_Point] || !(static_value[__HGS_ThumbstickX] == 0.0f && static_value[__HGS_ThumbstickY] == 0.0f)) {
 
 					// 取副手手掌中心作为移动点
-					auto vec = GetVector(f_oppHand, P_Palm);
+					auto vec = GetVector(f_hand, P_Palm);
 					glm::vec3 l_start(vec.x, vec.y, vec.z);
 
-					if (static_value2[__HGS_ThumbstickX] == 0.0f && static_value2[__HGS_ThumbstickY] == 0.0f) {
+					if (static_value[__HGS_ThumbstickX] == 0.0f && static_value[__HGS_ThumbstickY] == 0.0f) {
 
-						// printf("触摸重置 \n");
+						printf("[%d] 摇杆重置 \n", f_hand->type);
 
-						static_value2[__HGS_ThumbstickX] = l_start.x;
-						static_value2[__HGS_ThumbstickY] = l_start.y;
+						static_value[__HGS_ThumbstickX] = l_start.x;
+						static_value[__HGS_ThumbstickY] = l_start.y;
 					}
 					else {
 						// // 计算与中心点的角度
 						const float length = 25.0f;
-						glm::vec2 l_uv(-(l_start.x - static_value2[__HGS_ThumbstickX]), l_start.y - static_value2[__HGS_ThumbstickY]);
+						glm::vec2 l_uv(-(l_start.x - static_value[__HGS_ThumbstickX]), l_start.y - static_value[__HGS_ThumbstickY]);
 
-						l_uv /= 35.0f;
+						l_uv /= 35.0f + 10;
 
 						glm::vec2 old_uv = l_uv;
 
 						if (glm::length(l_uv) > 1.f)
 							l_uv = glm::normalize(l_uv);
 
-						static_value2[__HGS_ThumbstickX2] = l_uv.x;
-						static_value2[__HGS_ThumbstickY2] = l_uv.y;
+						static_value[HGS_ThumbstickX] = l_uv.x;
+						static_value[HGS_ThumbstickY] = l_uv.y;
+
+						printf("[%d] 摇杆设置 %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
 					}
-					
+
 					// 副手扣动扳机作为触摸板点击
 					static_value[HGS_ThumbstickClick] = static_value[HGS_Trigger] >= 1.0f;
 
 					// 禁用副手手势
-					static_gesture2[__HG_Disable] = true;
+					//static_gesture2[__HG_Disable] = true;
 				}
 			}
+			
 
-			static_value[HGS_TrackpadX] = static_value2[__HGS_TrackpadX2];
-			static_value[HGS_TrackpadY] = static_value2[__HGS_TrackpadY2];
+			//static_value[HGS_TrackpadX] = static_value[__HGS_TrackpadX2];
+			//static_value[HGS_TrackpadY] = static_value[__HGS_TrackpadY2];
 
-			static_value[HGS_ThumbstickX] = static_value2[__HGS_ThumbstickX2];
-			static_value[HGS_ThumbstickY] = static_value2[__HGS_ThumbstickY2];
+			// 摇杆存储在自身
+			//static_value[HGS_ThumbstickX] = static_value[__HGS_ThumbstickX2];
+			//static_value[HGS_ThumbstickY] = static_value[__HGS_ThumbstickY2];
 		}
 
 		gestures = static_gesture;
 		values = static_value;
 
 		// 扳机键功能互斥
+		if (values[HGS_TrackpadClick]) {
+			values[HGS_Trigger] = 0.0f;
+		}
+
 		if (values[HGS_ThumbstickClick]) {
 			values[HGS_Trigger] = 0.0f;
 		}

@@ -44,14 +44,14 @@ public:
         __HGS_TrackpadX,
         __HGS_TrackpadY,
 
-        __HGS_TrackpadX2,
-        __HGS_TrackpadY2,
+        //__HGS_TrackpadX2,
+        //__HGS_TrackpadY2,
 
         __HGS_ThumbstickX,
         __HGS_ThumbstickY,
 
-        __HGS_ThumbstickX2,
-        __HGS_ThumbstickY2,
+        //__HGS_ThumbstickX2,
+        //__HGS_ThumbstickY2,
 
         __HGS_DisableTrigger,
 

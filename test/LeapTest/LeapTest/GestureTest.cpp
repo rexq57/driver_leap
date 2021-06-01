@@ -220,7 +220,7 @@ public:
 				//DistanceRule(P_Index, P_Palm, 65, 112),
 				//DistanceRule(P_Middle, P_Palm, 69, 116),
 				//DistanceRule(P_Ring, P_Palm, 67.60, 114),
-				DistanceRule(P_Pinky, P_Thumb, 10, 40),
+				DistanceRule(P_Pinky, P_Thumb, 20, 40),
 			};
 
 			// 计算四个手指的范围
@@ -300,7 +300,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 			//printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
 
 			// 计算四个手指的范围
-			return DistanceNormalization(vec1, vec2, 30, 40);
+			return DistanceNormalization(vec1, vec2, 20, 40);
 		}
 	}
 	else {

@@ -57,21 +57,28 @@ void onFrame(const LEAP_TRACKING_EVENT* tracking_event) {
         for (size_t i = 0U; i < LCH_Count; i++)
         {
             CGestureMatcher::GetGestures(l_hands[i], gestures, values, l_hands[(i + 1) % LCH_Count]);
+
+            if (l_hands[i]) {
+                printf("[%d] HG_EmptyHold %d HG_SolidHold %d HG_Point %d HG_IndexTouch %d HG_PinkyTouch %d HG_PalmTouch %f HGS_Hold %f HGS_Trigger %f HGS_TrackpadX (%.2f, %.2f) HGS_Thumbstick (%.2f, %.2f)\n", l_hands[i]->type,
+                    (int)gestures[CGestureMatcher::HG_EmptyHold],
+                    (int)gestures[CGestureMatcher::HG_SolidHold],
+                    (int)gestures[CGestureMatcher::HG_Point],
+                    (int)gestures[CGestureMatcher::HG_IndexTouch],
+                    (int)gestures[CGestureMatcher::HG_PinkyTouch],
+                    values[CGestureMatcher::HGS_PalmTouch],
+                    values[CGestureMatcher::HGS_Hold],
+                    values[CGestureMatcher::HGS_Trigger],
+                    values[CGestureMatcher::HGS_TrackpadX],
+                    values[CGestureMatcher::HGS_TrackpadY],
+                    values[CGestureMatcher::HGS_ThumbstickX],
+                    values[CGestureMatcher::HGS_ThumbstickY]
+                );
+            }
+            
         }
     }
 
-    printf("[gestures] HG_EmptyHold %d HG_SolidHold %d HG_Point %d HG_IndexTouch %d HG_PinkyTouch %d HG_PalmTouch %f HGS_Hold %f HGS_Trigger %f HGS_Thumbstick (%.2f, %.2f)\n", 
-        (int)gestures[CGestureMatcher::HG_EmptyHold],
-        (int)gestures[CGestureMatcher::HG_SolidHold],
-        (int)gestures[CGestureMatcher::HG_Point],
-        (int)gestures[CGestureMatcher::HG_IndexTouch],
-        (int)gestures[CGestureMatcher::HG_PinkyTouch],
-        values[CGestureMatcher::HGS_PalmTouch],
-        values[CGestureMatcher::HGS_Hold],
-        values[CGestureMatcher::HGS_Trigger],
-        values[CGestureMatcher::HGS_ThumbstickX],
-        values[CGestureMatcher::HGS_ThumbstickY]
-        );
+    
 
     //std::cout << "on frame" << std::endl;
 }
