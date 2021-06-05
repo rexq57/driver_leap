@@ -1,24 +1,28 @@
 ## 中文说明：
 该项目只匹配leap motion模拟的Index控制器
+1、下载驱动 https://developer.leapmotion.com/sdk-leap-motion-controller
+2、下载leap插件放到steamvr的drivers目录(在库中右键SteamVR浏览本地文件) https://github.com/rexq57/driver_leap/releases
+
+
 
 ## 操作：
-* 【菜单】 食指触摸另一个手掌
-* 【扳机】 食指扣
-* 【B键】 拇指触摸小指
-* 【A键】 拇指触摸中指
-* 【触摸触摸板】拇指触摸食指中间节
-* 【触摸板XY】 保持触摸板触摸状态，脑部另一只手的食指射线，划过触摸板手掌心，来改变坐标
-* 【摇杆】食指触摸另一只手的拇指，移动食指来控制摇杆
+* 【菜单】 双手食指相碰
+* 【扳机】 手枪手势，食指扣下
+* 【B键】 食指、拇指粘合
+* 【A键】 小指、拇指粘合
+* 【触摸板】主手手枪，副手握拳，副手前后左右移动控制触摸区域，主手扣动扳机表示按下触摸板
+* 【摇杆】双手手枪，进入双手摇杆模式，前后移动来控制独立摇杆，可退出任意一只手的状态
 
 注意事项：
-为了防止误触，最好保持手掌张开
+
+手掌张开，表示手势复位。
 
 ########################################################
 
 # Driver Leap [![Build status](https://ci.appveyor.com/api/projects/status/2pc49d2hpt2hx944?svg=true)](https://ci.appveyor.com/project/SDraw/driver-leap) [![Release](http://img.shields.io/github/release/SDraw/driver_leap.svg)](../../releases/latest)
 
 Fork with updated vendor libraries.
-  
+
 ## Installation (for users)
 * Choose one of these options:
   * **For Windows 7, 8, 8.1 and 10:** Install [Orion (v4)](https://developer.leapmotion.com/sdk-leap-motion-controller)
