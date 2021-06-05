@@ -29,7 +29,7 @@ public:
 
         HGS_Hold,
         HGS_Trigger,
-        HGS_PalmTouch,
+        HGS_IndexContact,
 
         HGS_TrackpadX,
         HGS_TrackpadY,
@@ -39,7 +39,12 @@ public:
         HGS_ThumbstickX,
         HGS_ThumbstickY,
 
+        HGS_ThumbstickTouch,
         HGS_ThumbstickClick,
+
+        
+
+        __HGS_Trigger,
 
         __HGS_TrackpadX,
         __HGS_TrackpadY,
@@ -49,6 +54,8 @@ public:
 
         __HGS_ThumbstickX,
         __HGS_ThumbstickY,
+
+        __HGS_ThumbstickKeep,
 
         //__HGS_ThumbstickX2,
         //__HGS_ThumbstickY2,

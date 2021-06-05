@@ -220,7 +220,7 @@ public:
 				//DistanceRule(P_Index, P_Palm, 65, 112),
 				//DistanceRule(P_Middle, P_Palm, 69, 116),
 				//DistanceRule(P_Ring, P_Palm, 67.60, 114),
-				DistanceRule(P_Pinky, P_Thumb, 20, 40),
+				DistanceRule(P_Pinky, P_Thumb, 20, 68),
 			};
 
 			// 计算四个手指的范围
@@ -291,7 +291,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 
 		return DistanceNormalization(vec1, vec2, 60, 90);
 	}
-	else if (CGestureMatcher::HGS_PalmTouch == handGesture) {
+	else if (CGestureMatcher::HGS_IndexContact == handGesture) {
 		if (f_hand && f_oppHand) {
 
 			auto vec1 = GetVector(f_hand, P_Index);

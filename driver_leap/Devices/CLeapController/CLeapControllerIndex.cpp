@@ -329,7 +329,7 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         SET_VALUE(IB_TrackpadX, values[CGestureMatcher::HGS_TrackpadX]);
         SET_VALUE(IB_TrackpadY, values[CGestureMatcher::HGS_TrackpadY]);
 
-        SET_STATE(IB_ThumbstickTouch, values[CGestureMatcher::HGS_ThumbstickClick]);
+        SET_STATE(IB_ThumbstickTouch, values[CGestureMatcher::HGS_ThumbstickTouch]);
         SET_STATE(IB_ThumbstickClick, values[CGestureMatcher::HGS_ThumbstickClick]);
         SET_VALUE(IB_ThumbstickX, values[CGestureMatcher::HGS_ThumbstickX]);
         SET_VALUE(IB_ThumbstickY, values[CGestureMatcher::HGS_ThumbstickY]);
@@ -339,8 +339,8 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         SET_STATE(IB_ATouch, gestures[CGestureMatcher::HG_PinkyTouch]);
         SET_STATE(IB_AClick, gestures[CGestureMatcher::HG_PinkyTouch]);
 
-        SET_STATE(IB_SystemTouch, values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
-        SET_STATE(IB_SystemClick, values[CGestureMatcher::HGS_PalmTouch] >= 1.0f);
+        SET_STATE(IB_SystemTouch, values[CGestureMatcher::HGS_IndexContact] >= 1.0f);
+        SET_STATE(IB_SystemClick, values[CGestureMatcher::HGS_IndexContact] >= 1.0f);
 
         //m_buttons[IB_FingerIndex]->SetValue(l_gestures[CGestureMatcher::HG_IndexBend]);
         //m_buttons[IB_FingerMiddle]->SetValue(l_gestures[CGestureMatcher::HG_MiddleBend]);
