@@ -175,8 +175,9 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 				}
 			}
 
-			// 双手指向
-			if (static_gesture[HG_Point]) {
+			// 双手指向 (进入这个状态的前提是，无扳机状态)
+			float oppTrigger = GestureValue(f_oppHand, HGS_Trigger, f_hand);
+			if (static_gesture[HG_Point] && static_value[HGS_Trigger] < 0.25f && oppTrigger < 0.25f) {
 
 				bool reset = static_gesture2[HG_Point] && static_value[__HGS_ThumbstickKeep] == 0.0f;
 
