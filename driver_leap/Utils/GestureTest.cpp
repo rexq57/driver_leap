@@ -171,6 +171,7 @@ public:
 		else if (CGestureMatcher::HG_EmptyHold == handGesture) {
 			// (47.97, 75.96, 56.54) (40.99, 68.35, 44.83) (42.48, 79.68, 54.39) (35.76, 77.91, 55.73) (35.43, 64.02, 49.43)
 			std::vector<DistanceRule> dis_rules = {
+				DistanceRule(P_Index, P_Thumb, 30, 70),
 				DistanceRule(P_Index, P_Palm, 30, 78),
 				DistanceRule(P_Middle, P_Palm, 30, 92),
 				DistanceRule(P_Ring, P_Palm, 32, 86),
@@ -181,6 +182,7 @@ public:
 		else if (CGestureMatcher::HG_SolidHold == handGesture) {
 			// (42.80, 71.09, 45.65) (31.39, 50.50, 38.48) (29.74, 45.37, 33.52) (30.12, 42.23, 32.66) (28.71, 39.41, 30.61)
 			std::vector<DistanceRule> dis_rules = {
+				DistanceRule(P_Index, P_Thumb, 30, 70),
 				DistanceRule(P_Index, P_Palm, 16, 66.50),
 				DistanceRule(P_Middle, P_Palm, 23, 54),
 				DistanceRule(P_Ring, P_Palm, 22, 51),
@@ -281,6 +283,8 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 
 	 	LEAP_VECTOR vec1 = GetCenter(f_hand, positions);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
+
+		// printf("拇指 %f\n", Distance(f_hand, P_Thumb, P_Palm));
 
 		return DistanceNormalization(vec1, vec2, 29, 88);
 	}

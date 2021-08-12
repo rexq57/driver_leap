@@ -52,12 +52,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[ f_hand->type ];
 		std::vector<float>& static_value = static_lr_values[ f_hand->type ];
 
-		// 相同手势，用于检测
-		static const std::map<HandGesture, std::vector<HandGesture>> same_gestures = {
-			{HG_EmptyHold,{HG_SolidHold}},
-			{HG_SolidHold,{HG_EmptyHold}},
-			{HG_Point,{HG_SolidHold}},
-		};
+		
 
 		//printf("[gestures] HG_Open %d HG_EmptyHold %d HG_SolidHold %d HGS_Hold %f\n", open_test, emptyhold_test, solidhold_test, hold_value);
 
@@ -68,6 +63,9 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 			// 检测手势是否被识别
 			if (!GestureTest(f_hand, gesture, f_oppHand)) continue;
+
+			// 空手手势总是被初始化为false
+			static_gesture[HG_Open] = false;
 
 			// 空杯手势将清空当前手的所有值
 			if (gesture == HG_Open) {
@@ -84,29 +82,39 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			}
 			else {
 
-				// 对当前已经识别到的手势进行排斥检测，来决定其是否生效（被设置为true）
-				// 原理：检测当前已经被识别的手势，排斥其他任意已经被识别的手势
-				{
-					auto& same = same_gestures.at(gesture);
-					bool mutex = false;
-					for (HandGesture gesture : detect_gestures) {
-						if (static_gesture[gesture] && std::find(same.begin(), same.end(), gesture) == same.end()) {
-							mutex = true;
+				// 说明：握拳动作必须先于手枪手势出现才有效
+
+				// 不可重复识别的手势，value中出现了有效手势，则当前手势不能被识别
+				static std::map<HandGesture, std::vector<HandGesture>> truepass_gestures = {
+					{HG_EmptyHold,{HG_SolidHold, HG_Point}}, // 如果实心拳头出现，则空拳不能被二次识别
+					{HG_SolidHold,{HG_Point}}, // 如果手枪手势出现，则实心手势不能被二次识别，防止扣动扳机时，识别为握拳
+				};
+
+				// 对当前已经识别到的手势进行同类手势检测
+				bool truepass = false;
+				for (HandGesture truepass_gesture : truepass_gestures[gesture]) {
+					if (static_gesture[truepass_gesture]) {
+						truepass = true;
+						break;
+					}
+				}
+				if (!truepass)
+					static_gesture[gesture] = true;
+
+				// 互斥手势，对低级别手势进行强行清除（比如一些过渡手势，例如半握），value中出现了有效手势，则当前手势被确定为互斥状态（清除true状态）
+				static std::map<HandGesture, std::vector<HandGesture>> mutex_gestures = {
+					{HG_EmptyHold,{HG_SolidHold, HG_Point}},
+				};
+				for (auto it : mutex_gestures) {
+					for (HandGesture mutex_gesture : it.second) {
+						if (static_gesture[mutex_gesture]) {
+							static_gesture[it.first] = false;
 							break;
 						}
 					}
-					if (!mutex) {
-						static_gesture[gesture] = true;
-					}
 				}
-				// 空手手势被其他任意手势所排斥
-				static_gesture[HG_Open] = false;
 			}
 		}
-
-		// ��������
-		if (static_gesture[HG_SolidHold])
-			static_gesture[HG_EmptyHold] = false;
 
 
 
