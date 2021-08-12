@@ -15,45 +15,45 @@ glm::vec2 CalThumbstick(const glm::vec2& vec) {
 
 void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture, bool>& gestures, std::vector<float>& values, const LEAP_HAND* f_oppHand) {
 
+	// æ‰‹åŠ¿ç¼“å­˜æ”¯æŒ
 	static std::map<HandGesture, bool> static_lr_gestures[2];
 	static std::vector<float> static_lr_values[2];
 
+	// éœ€è¦æ£€æµ‹çš„æœ‰æ•ˆæ‰‹åŠ¿
+	static const std::vector<HandGesture> detect_gestures = {
+			HG_Open,
+			HG_EmptyHold,
+			HG_SolidHold,
+			HG_Point,
+			HG_IndexTouch,
+			HG_PinkyTouch
+	};
 
-	//printf("f_hand %p %_oppHand %p\n", f_hand, f_oppHand);
-	//static long count = 0;
-	//if (count++ < 1000) {
-	//	return;
-	//}
+	// ä½¿ç”¨å‰ï¼Œå¯¹æ‰‹åŠ¿ç¼“å­˜åˆå§‹åŒ–
+	for (int i = 0; i < 2; i++) {
+		std::map<HandGesture, bool>& gestures = static_lr_gestures[i];
+		if (gestures.size() == 0) {
+			for (int j = 0; j < detect_gestures.size(); j++) {
+				gestures[detect_gestures[j]] = false;
+			}
+		}
+
+		std::vector<float>& values = static_lr_values[i];
+		if (values.size() == 0) {
+			values.resize(HGS_MAX);
+			for (int i = 0; i < values.size(); i++) {
+				values[i] = 0.0f;
+			}
+		}
+	}
 
 	if (f_hand) {
 
 		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[ f_hand->type ];
 		std::vector<float>& static_value = static_lr_values[ f_hand->type ];
 
-		std::vector<HandGesture> detect_gestures = {
-				HG_Open,
-				HG_EmptyHold,
-				HG_SolidHold,
-				HG_Point,
-				HG_IndexTouch,
-				HG_PinkyTouch
-		};
-
-		if (static_gesture.size() == 0) {
-			for (int i = 0; i < detect_gestures.size(); i++) {
-				static_gesture[detect_gestures[i]] = false;
-			}
-		}
-
-		if (static_value.size() == 0) {
-			static_value.resize(HGS_MAX);
-			for (int i = 0; i < static_value.size(); i++) {
-				static_value[i] = 0.0f;
-			}
-		}
-
-		// ¶¨ÒåÍ¬ÀàÊÖÊÆ£¬»¥³â
-		std::map<HandGesture, std::vector<HandGesture>> same_gestures = {
+		// ç›¸åŒæ‰‹åŠ¿ï¼Œç”¨äºæ£€æµ‹
+		static const std::map<HandGesture, std::vector<HandGesture>> same_gestures = {
 			{HG_EmptyHold,{HG_SolidHold}},
 			{HG_SolidHold,{HG_EmptyHold}},
 			{HG_Point,{HG_SolidHold}},
@@ -61,30 +61,33 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 		//printf("[gestures] HG_Open %d HG_EmptyHold %d HG_SolidHold %d HGS_Hold %f\n", open_test, emptyhold_test, solidhold_test, hold_value);
 
+		// å…ˆè¿›è¡Œå•ä¸ªæ‰‹åŠ¿çš„åŸºç¡€è¯†åˆ«
 		for (int i = 0; i < detect_gestures.size(); i++) {
 
 			HandGesture gesture = detect_gestures[i];
-			bool test = GestureTest(f_hand, gesture, f_oppHand);
+
+			// æ£€æµ‹æ‰‹åŠ¿æ˜¯å¦è¢«è¯†åˆ«
+			if (!GestureTest(f_hand, gesture, f_oppHand)) continue;
+
+			// ç©ºæ¯æ‰‹åŠ¿å°†æ¸…ç©ºå½“å‰æ‰‹çš„æ‰€æœ‰å€¼
 			if (gesture == HG_Open) {
-				if (test) {
-					for (auto it : static_gesture) {
-						static_gesture[it.first] = false;
-					}
-					for (int i = 0; i < static_value.size(); i++) {
-						static_value[i] = 0.0f;
-					}
-
-					printf("[%d] reset\n", f_hand->type);
-
-					static_gesture[gesture] = true;
+				for (auto it : static_gesture) {
+					static_gesture[it.first] = false;
 				}
+				static_gesture[gesture] = true;
+
+				for (int i = 0; i < static_value.size(); i++) {
+					static_value[i] = 0.0f;
+				}
+
+				printf("[%d] reset\n", f_hand->type);
 			}
 			else {
 
-				if (test) {
-
-					// ¼ì²é»¥³âÊÖÊÆÊÇ·ñ´æÔÚ£¬´æÔÚµÄ»°£¬¾ÍÌø¹ıÊ¶±ğ
-					auto& same = same_gestures[gesture];
+				// å¯¹å½“å‰å·²ç»è¯†åˆ«åˆ°çš„æ‰‹åŠ¿è¿›è¡Œæ’æ–¥æ£€æµ‹ï¼Œæ¥å†³å®šå…¶æ˜¯å¦ç”Ÿæ•ˆï¼ˆè¢«è®¾ç½®ä¸ºtrueï¼‰
+				// åŸç†ï¼šæ£€æµ‹å½“å‰å·²ç»è¢«è¯†åˆ«çš„æ‰‹åŠ¿ï¼Œæ’æ–¥å…¶ä»–ä»»æ„å·²ç»è¢«è¯†åˆ«çš„æ‰‹åŠ¿
+				{
+					auto& same = same_gestures.at(gesture);
 					bool mutex = false;
 					for (HandGesture gesture : detect_gestures) {
 						if (static_gesture[gesture] && std::find(same.begin(), same.end(), gesture) == same.end()) {
@@ -95,21 +98,13 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					if (!mutex) {
 						static_gesture[gesture] = true;
 					}
-					static_gesture[HG_Open] = false;
-
-					// ¶îÍâÊÖÊÆ clear hold
-					if (gesture == HG_Point) {
-						/*if (static_gesture[HG_SolidHold]) {
-							static_gesture[__HG_HoldKeep] = true;
-						} else{
-							static_gesture[HG_SolidHold] = false;
-						}*/
-					}
 				}
+				// ç©ºæ‰‹æ‰‹åŠ¿è¢«å…¶ä»–ä»»æ„æ‰‹åŠ¿æ‰€æ’æ–¥
+				static_gesture[HG_Open] = false;
 			}
 		}
 
-		// »¥³âÊÖÊÆ
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (static_gesture[HG_SolidHold])
 			static_gesture[HG_EmptyHold] = false;
 
@@ -124,7 +119,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		}
 			
 
-		// Ë«ÊÖÊÖÊÆ
+		// Ë«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (f_oppHand) {
 
 			std::map<HandGesture, bool>& static_gesture2 = static_lr_gestures[f_oppHand->type];
@@ -136,24 +131,24 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			//	}
 			//}
 
-			// ¸±ÊÖÎÕÈ­ + Ö÷ÊÖÖ¸Ïò
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È­ + ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 			if (static_gesture2[HG_EmptyHold] || static_gesture2[HG_SolidHold]) {
 				
 				if (static_gesture[HG_Point]) {
 
-					// È¡¸±ÊÖÊÖÕÆÖĞĞÄ×÷ÎªÒÆ¶¯µã
+					// È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Æ¶ï¿½ï¿½ï¿½
 					auto vec = GetVector(f_oppHand, P_Palm);
 					glm::vec3 l_start(vec.x, vec.y, vec.z);
 					
 					if (static_value[__HGS_TrackpadX] == 0.0f && static_value[__HGS_TrackpadY] == 0.0f) {
 
-						printf("[%d] ´¥ÃşÖØÖÃ \n", f_oppHand->type);
+						printf("[%d] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ \n", f_oppHand->type);
 
 						static_value[__HGS_TrackpadX] = l_start.x;
 						static_value[__HGS_TrackpadY] = l_start.y;
 					}
 					else {
-						// // ¼ÆËãÓëÖĞĞÄµãµÄ½Ç¶È
+						// // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½Ä½Ç¶ï¿½
 						glm::vec2 l_uv(-(l_start.x - static_value[__HGS_TrackpadX]), l_start.y - static_value[__HGS_TrackpadY]);
 
 						l_uv /= 25.0f;
@@ -167,22 +162,22 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 						static_value[HGS_TrackpadY] = l_uv.y;
 					}
 
-					// ¸±ÊÖ¿Û¶¯°â»ú×÷Îª´¥Ãş°åµã»÷
+					// ï¿½ï¿½ï¿½Ö¿Û¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					static_value[HGS_TrackpadClick] = static_value[HGS_Trigger] >= 1.0f;
 
-					// ½ûÓÃ¸±ÊÖÊÖÊÆ
+					// ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					static_gesture2[__HG_Disable] = true;
 				}
 			}
 
-			// Ë«ÊÖÖ¸Ïò (½øÈëÕâ¸ö×´Ì¬µÄÇ°ÌáÊÇ£¬ÎŞ°â»ú×´Ì¬)
+			// Ë«ï¿½ï¿½Ö¸ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Ç£ï¿½ï¿½Ş°ï¿½ï¿½×´Ì¬)
 			float oppTrigger = GestureValue(f_oppHand, HGS_Trigger, f_hand);
 			if (static_gesture[HG_Point] && static_value[HGS_Trigger] < 0.25f && oppTrigger < 0.25f) {
 
 				bool reset = static_gesture2[HG_Point] && static_value[__HGS_ThumbstickKeep] == 0.0f;
 
 				if (static_value[__HGS_ThumbstickKeep] == 0.5f) {
-					// ¸±ÊÖ¸¨ÖúÊÍ·ÅÖ÷ÊÖ£¬µ±Ö÷ÊÖÒÆ¶¯¹ıµÄÊ±ºò
+					// ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 					if (static_gesture2[HG_Open]) {
 						if (DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]) >= 0.5f) {
 							reset = true;
@@ -193,20 +188,20 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					}
 				}
 
-				// È¡¸±ÊÖÊÖÕÆÖĞĞÄ×÷ÎªÒÆ¶¯µã
+				// È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Æ¶ï¿½ï¿½ï¿½
 				auto vec = GetVector(f_hand, P_Palm);
 				glm::vec3 l_start(vec.x, vec.y, vec.z);
 
 				if (reset) {
 
-					printf("[%d] Ò¡¸ËÖØÖÃ \n", f_hand->type);
+					printf("[%d] Ò¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ \n", f_hand->type);
 
 					static_value[HGS_ThumbstickX] = 0.0f;
 					static_value[HGS_ThumbstickY] = 0.0f;
 					static_value[__HGS_ThumbstickX] = l_start.x;
 					static_value[__HGS_ThumbstickY] = l_start.y;
 					
-					static_value[__HGS_ThumbstickKeep] = 0.5f;//init ? 0.5f : 0.0f; // ¸´Î»»áÔì³ÉÊÖÊÆÍêÈ«ÎŞĞ§£¬ĞèÒªÖØĞÂ½øÈë×´Ì¬
+					static_value[__HGS_ThumbstickKeep] = 0.5f;//init ? 0.5f : 0.0f; // ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½×´Ì¬
 					static_value[HGS_ThumbstickTouch] = 0.0f;
 					//static_value[HGS_ThumbstickClick] = 0.0f;
 				}
@@ -217,11 +212,11 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 		if (static_value[__HGS_ThumbstickKeep] > 0.0f) {
 
-			// È¡¸±ÊÖÊÖÕÆÖĞĞÄ×÷ÎªÒÆ¶¯µã
+			// È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Æ¶ï¿½ï¿½ï¿½
 			auto vec = GetVector(f_hand, P_Palm);
 			glm::vec3 l_start(vec.x, vec.y, vec.z);
 
-			// // ¼ÆËãÓëÖĞĞÄµãµÄ½Ç¶È
+			// // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½Ä½Ç¶ï¿½
 			glm::vec2 l_uv(-(l_start.x - static_value[__HGS_ThumbstickX]), l_start.y - static_value[__HGS_ThumbstickY]);
 
 			l_uv /= 35.0f + 20;
@@ -241,10 +236,10 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			static_value[HGS_ThumbstickX] = l_uv.x;
 			static_value[HGS_ThumbstickY] = l_uv.y;
 
-			printf("[%d] Ò¡¸ËÉèÖÃ %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
+			printf("[%d] Ò¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
 
 
-			// ¿Û¶¯°â»ú×÷Îª´¥Ãş°åµã»÷
+			// ï¿½Û¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			static_value[HGS_ThumbstickTouch] = static_value[HGS_ThumbstickX] != 0.0f || static_value[HGS_ThumbstickY] != 0.0f;//static_value[HGS_Trigger] > 0.0f;
 			static_value[HGS_ThumbstickClick] = static_value[HGS_Trigger] >= 1.0f;
 			
@@ -256,12 +251,12 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		gestures = static_gesture;
 		values = static_value;
 
-		// °â»ú¼ü¹¦ÄÜ»¥³â
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü»ï¿½ï¿½ï¿½
 		/*if (values[HGS_TrackpadClick]) {
 			values[HGS_Trigger] = 0.0f;
 		}*/
 
-		// Ò¡¸Ë¿ØÖÆµÄÊ±ºò£¬½ûÓÃ°â»ú£¬¸ÃÊÖÊÆ×÷ÎªÒ¡¸Ë°´ÏÂ²Ù×÷
+		// Ò¡ï¿½Ë¿ï¿½ï¿½Æµï¿½Ê±ï¿½ò£¬½ï¿½ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÒ¡ï¿½Ë°ï¿½ï¿½Â²ï¿½ï¿½ï¿½
 		if (values[__HGS_ThumbstickKeep] > 0.0f) {
 			values[HGS_Trigger] = 0.0f;
 		}
