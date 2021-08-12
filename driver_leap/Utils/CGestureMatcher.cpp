@@ -47,10 +47,36 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		}
 	}
 
+
 	if (f_hand) {
 
 		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[ f_hand->type ];
 		std::vector<float>& static_value = static_lr_values[ f_hand->type ];
+
+		/*
+		std::vector<HandGesture> detect_gestures = {
+				HG_Open,
+				HG_EmptyHold,
+				HG_SolidHold,
+				HG_Point,
+				HG_IndexTouch,
+				HG_PinkyTouch
+		};
+
+		if (static_gesture.size() == 0) {
+			for (int i = 0; i < detect_gestures.size(); i++) {
+				static_gesture[detect_gestures[i]] = false;
+			}
+		}
+
+		if (static_value.size() == 0) {
+			static_value.resize(HGS_MAX);
+			for (int i = 0; i < static_value.size(); i++) {
+				static_value[i] = 0.0f;
+			}
+		}
+		*/
+		
 
 		
 
