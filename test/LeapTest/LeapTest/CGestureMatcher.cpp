@@ -103,17 +103,16 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 				// 互斥手势，对低级别手势进行强行清除（比如一些过渡手势，例如半握），value中出现了有效手势，则当前手势被确定为互斥状态（清除true状态）
 				static std::map<HandGesture, std::vector<HandGesture>> mutex_gestures = {
-					{HG_EmptyHold,{HG_SolidHold, HG_Point}}
+					{HG_EmptyHold,{HG_SolidHold, HG_Point}},
 				};
-				bool mutex = false;
-				for (HandGesture mutex_gesture : mutex_gestures[gesture]) {
-					if (static_gesture[mutex_gesture]) {
-						mutex = true;
-						break;
+				for (auto it : mutex_gestures) {
+					for (HandGesture mutex_gesture : it.second) {
+						if (static_gesture[mutex_gesture]) {
+							static_gesture[it.first] = false;
+							break;
+						}
 					}
 				}
-				if (mutex)
-					static_gesture[gesture] = false;
 			}
 		}
 
