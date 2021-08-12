@@ -8,7 +8,7 @@ float DistanceCenter(float x, float y) {
 }
 
 glm::vec2 CalThumbstick(const glm::vec2& vec) {
-	float l = sqrtf(vec.x * vec.x + vec.y*vec.y);
+	float l = sqrtf(vec.x * vec.x + vec.y * vec.y);
 	float s = l;
 	return vec * s;
 }
@@ -49,10 +49,10 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 	if (f_hand) {
 
-		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[ f_hand->type ];
-		std::vector<float>& static_value = static_lr_values[ f_hand->type ];
+		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[f_hand->type];
+		std::vector<float>& static_value = static_lr_values[f_hand->type];
 
-		
+
 
 		//printf("[gestures] HG_Open %d HG_EmptyHold %d HG_SolidHold %d HGS_Hold %f\n", open_test, emptyhold_test, solidhold_test, hold_value);
 
@@ -125,7 +125,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			static_value[__HGS_Trigger] = static_value[HGS_Trigger];
 			static_value[HGS_Trigger] = GestureValue(f_hand, HGS_Trigger, f_oppHand);
 		}
-			
+
 
 		// ˫������
 		if (f_oppHand) {
@@ -141,13 +141,13 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 			// ������ȭ + ����ָ��
 			if (static_gesture2[HG_EmptyHold] || static_gesture2[HG_SolidHold]) {
-				
+
 				if (static_gesture[HG_Point]) {
 
 					// ȡ��������������Ϊ�ƶ���
 					auto vec = GetVector(f_oppHand, P_Palm);
 					glm::vec3 l_start(vec.x, vec.y, vec.z);
-					
+
 					if (static_value[__HGS_TrackpadX] == 0.0f && static_value[__HGS_TrackpadY] == 0.0f) {
 
 						printf("[%d] �������� \n", f_oppHand->type);
@@ -208,13 +208,13 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					static_value[HGS_ThumbstickY] = 0.0f;
 					static_value[__HGS_ThumbstickX] = l_start.x;
 					static_value[__HGS_ThumbstickY] = l_start.y;
-					
+
 					static_value[__HGS_ThumbstickKeep] = 0.5f;//init ? 0.5f : 0.0f; // ��λ�����������ȫ��Ч����Ҫ���½���״̬
 					static_value[HGS_ThumbstickTouch] = 0.0f;
 					//static_value[HGS_ThumbstickClick] = 0.0f;
 				}
 
-				
+
 			}
 		}
 
@@ -235,10 +235,11 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 			if (glm::length(l_uv) > 1.f) {
 				l_uv = glm::normalize(l_uv);
-			} else if (glm::length(l_uv) < invalid_length) {
+			}
+			else if (glm::length(l_uv) < invalid_length) {
 				l_uv = { 0.0f , 0.0f };
 			}
-				
+
 			l_uv = CalThumbstick(l_uv);
 
 			static_value[HGS_ThumbstickX] = l_uv.x;
@@ -250,11 +251,11 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			// �۶������Ϊ��������
 			static_value[HGS_ThumbstickTouch] = static_value[HGS_ThumbstickX] != 0.0f || static_value[HGS_ThumbstickY] != 0.0f;//static_value[HGS_Trigger] > 0.0f;
 			static_value[HGS_ThumbstickClick] = static_value[HGS_Trigger] >= 1.0f;
-			
+
 			printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
 		}
 
-		
+
 
 		gestures = static_gesture;
 		values = static_value;
@@ -284,7 +285,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		}
 	}
 
-	
-	
+
+
 
 }

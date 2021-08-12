@@ -219,11 +219,14 @@ public:
 		}
 		else if (CGestureMatcher::HG_PinkyTouch == handGesture) {
 			std::vector<DistanceRule> dis_rules = {
-				//DistanceRule(P_Index, P_Palm, 65, 112),
+				DistanceRule(P_Index, P_Thumb, 65, 112),
 				//DistanceRule(P_Middle, P_Palm, 69, 116),
 				//DistanceRule(P_Ring, P_Palm, 67.60, 114),
 				DistanceRule(P_Pinky, P_Thumb, 20, 68),
 			};
+
+			// 食指与拇指距离
+			//printf("距离 %f\n", Distance(f_hand, P_Thumb, P_Index));
 
 			// �����ĸ���ָ�ķ�Χ
 			result = DistanceLimit(f_hand, dis_rules);
