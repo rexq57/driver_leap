@@ -116,28 +116,23 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			}
 		}
 
+		#define UpdateValue(c, g) if (c != -1 && static_gesture[(HandGesture)c]) {static_value[__HGS_LAST + 1 + g] = static_value[g]; static_value[g] = GestureValue(f_hand, g, f_oppHand);}
 
-
-		static_value[HGS_Hold] = GestureValue(f_hand, HGS_Hold, f_oppHand);
-		static_value[HGS_IndexContact] = GestureValue(f_hand, HGS_IndexContact, f_oppHand);
-
-		if (static_gesture[HG_Point]) {
-			static_value[__HGS_Trigger] = static_value[HGS_Trigger];
+		// static_value[HGS_Hold] = GestureValue(f_hand, HGS_Hold, f_oppHand);
+		// static_value[HGS_IndexContact] = GestureValue(f_hand, HGS_IndexContact, f_oppHand);
+		/*if (static_gesture[HG_Point]) {
+			static_value[__HGS_Trigger] = static_value[HGS_Trigger]; // 记录最后一次的值
 			static_value[HGS_Trigger] = GestureValue(f_hand, HGS_Trigger, f_oppHand);
-		}
-			
+		}*/
 
-		// ˫������
+		UpdateValue(-1, HGS_Hold);
+		UpdateValue(HG_Point, HGS_Trigger);
+		UpdateValue(-1, HGS_IndexContact);
+
+		// 副手识别
 		if (f_oppHand) {
 
 			std::map<HandGesture, bool>& static_gesture2 = static_lr_gestures[f_oppHand->type];
-			//std::vector<float>& static_value2 = static_lr_values[f_oppHand->type];
-			//if (static_value2.size() == 0) {
-			//	static_value2.resize(HGS_MAX);
-			//	for (int i = 0; i < static_value2.size(); i++) {
-			//		static_value2[i] = 0.0f;
-			//	}
-			//}
 
 			// ������ȭ + ����ָ��
 			if (static_gesture2[HG_EmptyHold] || static_gesture2[HG_SolidHold]) {
