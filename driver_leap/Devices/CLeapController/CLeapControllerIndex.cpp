@@ -347,7 +347,7 @@ void CLeapControllerIndex::UpdateGestures(const LEAP_HAND *f_hand, const LEAP_HA
         //m_buttons[IB_FingerRing]->SetValue(l_gestures[CGestureMatcher::HG_RingBend]);
         //m_buttons[IB_FingerPinky]->SetValue(l_gestures[CGestureMatcher::HG_PinkyBend]);
 
-        // 手指基本数据传给游戏
+        // 锟斤拷指锟斤拷锟斤拷锟斤拷锟捷达拷锟斤拷锟斤拷戏
         for(size_t i = 0U; i < 5U; i++)
         {
             const LEAP_DIGIT &l_finger = f_hand->digits[i];

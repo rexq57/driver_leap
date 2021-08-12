@@ -119,7 +119,7 @@ private:
 	Position pos1, pos2;
 };
 
-// ¼ÆËãÊÖÊÆÊÇ·ñÂú×ã¹æ¸ñÏÞÖÆ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 bool DistanceLimit(const LEAP_HAND* f_hand, std::vector<DistanceRule>& dis_rules) {
 
 	bool result = true;
@@ -187,7 +187,7 @@ public:
 				DistanceRule(P_Pinky, P_Palm, 25, 48),
 			};
 
-			// ¼ÆËãËÄ¸öÊÖÖ¸µÄ·¶Î§
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½Ö¸ï¿½Ä·ï¿½Î§
 			result = DistanceLimit(f_hand, dis_rules);
 		}
 		else if (CGestureMatcher::HG_Point == handGesture) {
@@ -199,7 +199,7 @@ public:
 				DistanceRule(P_Pinky, P_Palm, 25, 48),
 			};
 
-			// ¼ÆËãËÄ¸öÊÖÖ¸µÄ·¶Î§
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½Ö¸ï¿½Ä·ï¿½Î§
 			result = DistanceLimit(f_hand, dis_rules);
 		}
 		else if (CGestureMatcher::HG_IndexTouch == handGesture) {
@@ -212,7 +212,7 @@ public:
 
 			//printf("%f \n", Distance(f_hand, P_Index, P_Thumb));
 
-			// ¼ÆËãËÄ¸öÊÖÖ¸µÄ·¶Î§
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½Ö¸ï¿½Ä·ï¿½Î§
 			result = DistanceLimit(f_hand, dis_rules);
 		}
 		else if (CGestureMatcher::HG_PinkyTouch == handGesture) {
@@ -223,7 +223,7 @@ public:
 				DistanceRule(P_Pinky, P_Thumb, 20, 68),
 			};
 
-			// ¼ÆËãËÄ¸öÊÖÖ¸µÄ·¶Î§
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½Ö¸ï¿½Ä·ï¿½Î§
 			result = DistanceLimit(f_hand, dis_rules);
 		}
 		else {
@@ -235,7 +235,7 @@ public:
 
 	void printInfo() {
 
-		// ¼ÆËã×î½ü¼¸´ÎÆ½¾ù
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½
 		/*printf("printInfo");
 		for (int i = 0; i < dis_rules.size(); i++) {
 			float len = dis_rules[i].len;
@@ -270,7 +270,7 @@ bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGestu
 float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub handGesture, const LEAP_HAND* f_oppHand) {
 
 	if (CGestureMatcher::HGS_Hold == handGesture) {
-		// ¼ÆËã4Ö¸ÖÐÐÄ¾àÀëÊÖÐÄµÄ¾àÀë
+		// ï¿½ï¿½ï¿½ï¿½4Ö¸ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÄµÄ¾ï¿½ï¿½ï¿½
 
 		std::vector<Position> positions = {
 				P_Index,
@@ -299,7 +299,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 
 			//printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
 
-			// ¼ÆËãËÄ¸öÊÖÖ¸µÄ·¶Î§
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½Ö¸ï¿½Ä·ï¿½Î§
 			return DistanceNormalization(vec1, vec2, 20, 40);
 		}
 	}
