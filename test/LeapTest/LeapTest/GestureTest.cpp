@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GestureTest.h"
-#include <glm/glm.hpp>
 #include <numeric>
 
 #define TEST_OPEN
@@ -16,6 +15,12 @@ LEAP_VECTOR GetVector(const LEAP_HAND* f_hand, Position pos) {
 	};
 
 	return vector_array[pos];
+}
+
+glm::vec3 GetVec3(const LEAP_HAND* f_hand, Position pos) {
+	auto vec = GetVector(f_hand, pos);
+	glm::vec3 l_start(vec.x, vec.y, vec.z);
+	return l_start;
 }
 
 float Distance(const std::vector<LEAP_VECTOR>& vecList, const LEAP_VECTOR& vec2) {

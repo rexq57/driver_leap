@@ -116,7 +116,10 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			}
 		}
 
-		#define UpdateValue(c, g) if (c != -1 && static_gesture[(HandGesture)c]) {static_value[__HGS_LAST + 1 + g] = static_value[g]; static_value[g] = GestureValue(f_hand, g, f_oppHand);}
+		// 如果手势存在，则进行值的更新，否则置零
+		#define UpdateValue(c, g) {static_value[__HGS_LAST + 1 + g] = static_value[g]; \
+if (c == -1 || static_gesture[(HandGesture)c]) static_value[g] = GestureValue(f_hand, g, f_oppHand); \
+else static_value[g] = 0.0f;}
 
 		// static_value[HGS_Hold] = GestureValue(f_hand, HGS_Hold, f_oppHand);
 		// static_value[HGS_IndexContact] = GestureValue(f_hand, HGS_IndexContact, f_oppHand);
@@ -134,14 +137,13 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 			std::map<HandGesture, bool>& static_gesture2 = static_lr_gestures[f_oppHand->type];
 
-			// ������ȭ + ����ָ��
+			// 副手握拳+主手手枪，捕捉握拳水平移动
 			if (static_gesture2[HG_EmptyHold] || static_gesture2[HG_SolidHold]) {
 				
 				if (static_gesture[HG_Point]) {
 
-					// ȡ��������������Ϊ�ƶ���
-					auto vec = GetVector(f_oppHand, P_Palm);
-					glm::vec3 l_start(vec.x, vec.y, vec.z);
+					// 当前手掌中心点
+					glm::vec3 l_start = GetVec3(f_oppHand, P_Palm);
 					
 					if (static_value[__HGS_TrackpadX] == 0.0f && static_value[__HGS_TrackpadY] == 0.0f) {
 
@@ -192,8 +194,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 				}
 
 				// ȡ��������������Ϊ�ƶ���
-				auto vec = GetVector(f_hand, P_Palm);
-				glm::vec3 l_start(vec.x, vec.y, vec.z);
+				glm::vec3 l_start = GetVec3(f_hand, P_Palm);
 
 				if (reset) {
 
@@ -216,8 +217,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		if (static_value[__HGS_ThumbstickKeep] > 0.0f) {
 
 			// ȡ��������������Ϊ�ƶ���
-			auto vec = GetVector(f_hand, P_Palm);
-			glm::vec3 l_start(vec.x, vec.y, vec.z);
+			glm::vec3 l_start = GetVec3(f_hand, P_Palm);
 
 			// // ���������ĵ�ĽǶ�
 			glm::vec2 l_uv(-(l_start.x - static_value[__HGS_ThumbstickX]), l_start.y - static_value[__HGS_ThumbstickY]);
