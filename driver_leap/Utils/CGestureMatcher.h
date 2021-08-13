@@ -20,7 +20,7 @@ public:
         HG_IndexTouch,
         HG_PinkyTouch,
 
-        __HG_Disable,
+        __HG_Disable, // 副手手势禁止标志，表示当前手势被用作双手手势
 
         HG_MAX,
     };
@@ -42,24 +42,21 @@ public:
         HGS_ThumbstickTouch,
         HGS_ThumbstickClick,
 
+        __HGS_LAST,
         
-
+        __HGS_Hold,
         __HGS_Trigger,
+        __HGS_IndexContact,
 
         __HGS_TrackpadX,
         __HGS_TrackpadY,
 
-        //__HGS_TrackpadX2,
-        //__HGS_TrackpadY2,
+        __HGS_TrackpadClick,
 
         __HGS_ThumbstickX,
         __HGS_ThumbstickY,
 
         __HGS_ThumbstickKeep,
-
-        //__HGS_ThumbstickX2,
-        //__HGS_ThumbstickY2,
-
         __HGS_DisableTrigger,
 
         HGS_MAX,

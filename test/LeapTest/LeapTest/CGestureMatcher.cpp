@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "CGestureMatcher.h"
 #include <glm/glm.hpp>
+#include <functional>
+#include <chrono>
 #include "GestureTest.h"
+
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
 
 float DistanceCenter(float x, float y) {
 	return sqrtf(x * x + y * y);
@@ -18,6 +23,39 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 	// 手势缓存支持
 	static std::map<HandGesture, bool> static_lr_gestures[2];
 	static std::vector<float> static_lr_values[2];
+	static HandGesture static_last_lr_gesture[2] = { HG_Open };
+	static std::map<HandGesture, std::function<void(void)>> static_lr_callback[2];
+	struct TimerCallback{
+		high_resolution_clock::time_point start;
+		int time_ms;
+		std::function<void(void)> keep_callback;
+		std::function<void(void)> callback;
+		TimerCallback() {
+			clear();
+		}
+		TimerCallback(high_resolution_clock::time_point start, int time_ms, std::function<void(void)> keep_callback, std::function<void(void)> callback) {
+			this->start = start;
+			this->time_ms = time_ms;
+			this->keep_callback = keep_callback;
+			this->callback = callback;
+		}
+		bool check() {
+			if (time_ms == -1) return false;
+			high_resolution_clock::time_point end = high_resolution_clock::now();
+			milliseconds cost_ms = std::chrono::duration_cast<milliseconds>(end - start);
+			return cost_ms.count() >= time_ms;
+		}
+		void keep() {
+			if (keep_callback) keep_callback();
+		}
+		void clear() {
+			start = high_resolution_clock::now();
+			time_ms = -1;
+			keep_callback = 0;
+			callback = 0;
+		}
+	};
+	static TimerCallback static_lr_timers[2];
 
 	// 需要检测的有效手势
 	static const std::vector<HandGesture> detect_gestures = {
@@ -52,8 +90,6 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[ f_hand->type ];
 		std::vector<float>& static_value = static_lr_values[ f_hand->type ];
 
-		
-
 		//printf("[gestures] HG_Open %d HG_EmptyHold %d HG_SolidHold %d HGS_Hold %f\n", open_test, emptyhold_test, solidhold_test, hold_value);
 
 		// 先进行单个手势的基础识别
@@ -67,7 +103,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			// 空手手势总是被初始化为false
 			static_gesture[HG_Open] = false;
 
-			// 空杯手势将清空当前手的所有值
+			// 空手手势将清空当前手的所有值
 			if (gesture == HG_Open) {
 				for (auto it : static_gesture) {
 					static_gesture[it.first] = false;
@@ -114,6 +150,41 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					}
 				}
 			}
+			
+			auto& last_gesture = static_last_lr_gesture[f_hand->type];
+			bool gesture_changed = last_gesture != gesture;
+			if (gesture_changed) {
+				auto& callback = static_lr_callback[f_hand->type][gesture];
+				if (callback) {
+					callback();
+				}
+				static_lr_callback->clear();
+			}
+			
+			// 从手枪复位之后
+			if (last_gesture == HG_Point && gesture == HG_Open) {
+				// printf("设置回调\n");
+				high_resolution_clock::time_point start = high_resolution_clock::now();
+				auto type = f_hand->type;
+				static_lr_callback[f_hand->type][HG_Point] = [start, &static_value, type]() {
+					high_resolution_clock::time_point end = high_resolution_clock::now();
+					milliseconds cost_ms = std::chrono::duration_cast<milliseconds>(end - start);
+					// 连续做出手枪手势后，触发计时器
+					if (cost_ms.count() < 150) {
+						static_lr_timers[type] = TimerCallback(start, 3000, [&static_value](){
+							static_value[HGS_Trigger] = 0.0f;
+							}, [&static_value]() {
+							static_value[HGS_Trigger] = 1.0f;
+						});
+						
+						//printf("fuck you %dms\n", cost_ms.count());
+						//printf("\n");
+					}
+				};
+			}
+
+			// 记录最后一次成功识别的手势
+			last_gesture = gesture;
 		}
 
 		// 如果手势存在，则进行值的更新，否则置零
@@ -255,6 +326,13 @@ else static_value[g] = 0.0f;}
 			// printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
 		}
 
+		TimerCallback& tc = static_lr_timers[f_hand->type];
+		tc.keep();
+		if (tc.check() && tc.callback) {
+			tc.callback();
+			tc.clear();
+		}
+
 		// 直接复制返回值
 		gestures = static_gesture;
 		values = static_value;
@@ -265,6 +343,7 @@ else static_value[g] = 0.0f;}
 		}
 	}
 	else {
+
 		if (gestures.size() == 0) {
 			for (int i = 0; i < gestures.size(); i++) {
 				gestures[(HandGesture)i] = false;

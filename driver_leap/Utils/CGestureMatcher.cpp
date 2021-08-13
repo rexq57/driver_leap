@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "CGestureMatcher.h"
 #include <glm/glm.hpp>
+#include <functional>
+#include <chrono>
 #include "GestureTest.h"
+
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
 
 float DistanceCenter(float x, float y) {
 	return sqrtf(x * x + y * y);
@@ -18,6 +23,39 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 	// 手势缓存支持
 	static std::map<HandGesture, bool> static_lr_gestures[2];
 	static std::vector<float> static_lr_values[2];
+	static HandGesture static_last_lr_gesture[2] = { HG_Open };
+	static std::map<HandGesture, std::function<void(void)>> static_lr_callback[2];
+	struct TimerCallback {
+		high_resolution_clock::time_point start;
+		int time_ms;
+		std::function<void(void)> keep_callback;
+		std::function<void(void)> callback;
+		TimerCallback() {
+			clear();
+		}
+		TimerCallback(high_resolution_clock::time_point start, int time_ms, std::function<void(void)> keep_callback, std::function<void(void)> callback) {
+			this->start = start;
+			this->time_ms = time_ms;
+			this->keep_callback = keep_callback;
+			this->callback = callback;
+		}
+		bool check() {
+			if (time_ms == -1) return false;
+			high_resolution_clock::time_point end = high_resolution_clock::now();
+			milliseconds cost_ms = std::chrono::duration_cast<milliseconds>(end - start);
+			return cost_ms.count() >= time_ms;
+		}
+		void keep() {
+			if (keep_callback) keep_callback();
+		}
+		void clear() {
+			start = high_resolution_clock::now();
+			time_ms = -1;
+			keep_callback = 0;
+			callback = 0;
+		}
+	};
+	static TimerCallback static_lr_timers[2];
 
 	// 需要检测的有效手势
 	static const std::vector<HandGesture> detect_gestures = {
@@ -52,8 +90,6 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 		std::map<HandGesture, bool>& static_gesture = static_lr_gestures[f_hand->type];
 		std::vector<float>& static_value = static_lr_values[f_hand->type];
 
-
-
 		//printf("[gestures] HG_Open %d HG_EmptyHold %d HG_SolidHold %d HGS_Hold %f\n", open_test, emptyhold_test, solidhold_test, hold_value);
 
 		// 先进行单个手势的基础识别
@@ -67,7 +103,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			// 空手手势总是被初始化为false
 			static_gesture[HG_Open] = false;
 
-			// 空杯手势将清空当前手的所有值
+			// 空手手势将清空当前手的所有值
 			if (gesture == HG_Open) {
 				for (auto it : static_gesture) {
 					static_gesture[it.first] = false;
@@ -114,52 +150,86 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					}
 				}
 			}
+
+			auto& last_gesture = static_last_lr_gesture[f_hand->type];
+			bool gesture_changed = last_gesture != gesture;
+			if (gesture_changed) {
+				auto& callback = static_lr_callback[f_hand->type][gesture];
+				if (callback) {
+					callback();
+				}
+				static_lr_callback->clear();
+			}
+
+			// 从手枪复位之后
+			if (last_gesture == HG_Point && gesture == HG_Open) {
+				// printf("设置回调\n");
+				high_resolution_clock::time_point start = high_resolution_clock::now();
+				auto type = f_hand->type;
+				static_lr_callback[f_hand->type][HG_Point] = [start, &static_value, type]() {
+					high_resolution_clock::time_point end = high_resolution_clock::now();
+					milliseconds cost_ms = std::chrono::duration_cast<milliseconds>(end - start);
+					// 连续做出手枪手势后，触发计时器
+					if (cost_ms.count() < 150) {
+						static_lr_timers[type] = TimerCallback(start, 3000, [&static_value]() {
+							static_value[HGS_Trigger] = 0.0f;
+							}, [&static_value]() {
+								static_value[HGS_Trigger] = 1.0f;
+							});
+
+						//printf("fuck you %dms\n", cost_ms.count());
+						//printf("\n");
+					}
+				};
+			}
+
+			// 记录最后一次成功识别的手势
+			last_gesture = gesture;
 		}
 
+		// 如果手势存在，则进行值的更新，否则置零
+#define UpdateValue(c, g) {static_value[__HGS_LAST + 1 + g] = static_value[g]; \
+if (c == -1 || static_gesture[(HandGesture)c]) static_value[g] = GestureValue(f_hand, g, f_oppHand); \
+else static_value[g] = 0.0f;}
 
-
-		static_value[HGS_Hold] = GestureValue(f_hand, HGS_Hold, f_oppHand);
-		static_value[HGS_IndexContact] = GestureValue(f_hand, HGS_IndexContact, f_oppHand);
-
-		if (static_gesture[HG_Point]) {
-			static_value[__HGS_Trigger] = static_value[HGS_Trigger];
+		// static_value[HGS_Hold] = GestureValue(f_hand, HGS_Hold, f_oppHand);
+		// static_value[HGS_IndexContact] = GestureValue(f_hand, HGS_IndexContact, f_oppHand);
+		/*if (static_gesture[HG_Point]) {
+			static_value[__HGS_Trigger] = static_value[HGS_Trigger]; // 记录最后一次的值
 			static_value[HGS_Trigger] = GestureValue(f_hand, HGS_Trigger, f_oppHand);
-		}
+		}*/
 
+		// 先处理三个距离值
+		UpdateValue(-1, HGS_Hold);
+		UpdateValue(HG_Point, HGS_Trigger);
+		UpdateValue(-1, HGS_IndexContact);
 
-		// ˫������
+		// 副手识别
 		if (f_oppHand) {
 
 			std::map<HandGesture, bool>& static_gesture2 = static_lr_gestures[f_oppHand->type];
-			//std::vector<float>& static_value2 = static_lr_values[f_oppHand->type];
-			//if (static_value2.size() == 0) {
-			//	static_value2.resize(HGS_MAX);
-			//	for (int i = 0; i < static_value2.size(); i++) {
-			//		static_value2[i] = 0.0f;
-			//	}
-			//}
 
-			// ������ȭ + ����ָ��
+			// 副手握拳+主手手枪，捕捉握拳水平移动
 			if (static_gesture2[HG_EmptyHold] || static_gesture2[HG_SolidHold]) {
 
 				if (static_gesture[HG_Point]) {
 
-					// ȡ��������������Ϊ�ƶ���
-					auto vec = GetVector(f_oppHand, P_Palm);
-					glm::vec3 l_start(vec.x, vec.y, vec.z);
+					// 当前手掌中心点
+					glm::vec3 l_start = GetVec3(f_oppHand, P_Palm);
 
+					// 当触摸板没有值的时候，初始化中心点坐标
 					if (static_value[__HGS_TrackpadX] == 0.0f && static_value[__HGS_TrackpadY] == 0.0f) {
 
-						printf("[%d] �������� \n", f_oppHand->type);
+						// printf("[%d] �������� \n", f_oppHand->type);
 
 						static_value[__HGS_TrackpadX] = l_start.x;
 						static_value[__HGS_TrackpadY] = l_start.y;
 					}
 					else {
-						// // ���������ĵ�ĽǶ�
+						// 计算圆盘中心偏移距离（归一化）
 						glm::vec2 l_uv(-(l_start.x - static_value[__HGS_TrackpadX]), l_start.y - static_value[__HGS_TrackpadY]);
 
-						l_uv /= 25.0f;
+						l_uv /= 25.0f; // 圆盘半径
 
 						glm::vec2 old_uv = l_uv;
 
@@ -170,61 +240,62 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 						static_value[HGS_TrackpadY] = l_uv.y;
 					}
 
-					// ���ֿ۶������Ϊ��������
+					// 触摸板按下由主手扳机控制
 					static_value[HGS_TrackpadClick] = static_value[HGS_Trigger] >= 1.0f;
 
-					// ���ø�������
+					// 禁止副手手势
 					static_gesture2[__HG_Disable] = true;
 				}
 			}
 
-			// ˫��ָ�� (�������״̬��ǰ���ǣ��ް��״̬)
+			// 双手手枪时的手势确认(为了防止误识别，设定双手扳机不能扣下)
 			float oppTrigger = GestureValue(f_oppHand, HGS_Trigger, f_hand);
 			if (static_gesture[HG_Point] && static_value[HGS_Trigger] < 0.25f && oppTrigger < 0.25f) {
 
+				// 确定第一时间初始化
 				bool reset = static_gesture2[HG_Point] && static_value[__HGS_ThumbstickKeep] == 0.0f;
 
+				// 已初始化，但未进入单手控制状态时
 				if (static_value[__HGS_ThumbstickKeep] == 0.5f) {
-					// ���ָ����ͷ����֣��������ƶ�����ʱ��
+					// 副手空手势时的操作
 					if (static_gesture2[HG_Open]) {
+						// 如果主手位移超过0.5半径，重设状态（保证主手以当前位置再次初始化）
 						if (DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]) >= 0.5f) {
 							reset = true;
 						}
 						else {
+							// 主手不动，副手立马空手势，即希望副手腾出来，设置此单手摇杆持续标记
 							static_value[__HGS_ThumbstickKeep] = 1.0f;
 						}
 					}
 				}
 
-				// ȡ��������������Ϊ�ƶ���
-				auto vec = GetVector(f_hand, P_Palm);
-				glm::vec3 l_start(vec.x, vec.y, vec.z);
-
 				if (reset) {
 
-					printf("[%d] ҡ������ \n", f_hand->type);
+					// printf("[%d] ҡ������ \n", f_hand->type);
+
+					// 主手中心点
+					glm::vec3 l_start = GetVec3(f_hand, P_Palm);
 
 					static_value[HGS_ThumbstickX] = 0.0f;
 					static_value[HGS_ThumbstickY] = 0.0f;
-					static_value[__HGS_ThumbstickX] = l_start.x;
+					static_value[__HGS_ThumbstickX] = l_start.x; // 记录中心点
 					static_value[__HGS_ThumbstickY] = l_start.y;
 
-					static_value[__HGS_ThumbstickKeep] = 0.5f;//init ? 0.5f : 0.0f; // ��λ�����������ȫ��Ч����Ҫ���½���״̬
+					static_value[__HGS_ThumbstickKeep] = 0.5f; // 初始化过的标记
 					static_value[HGS_ThumbstickTouch] = 0.0f;
 					//static_value[HGS_ThumbstickClick] = 0.0f;
 				}
-
-
 			}
 		}
 
+		// 对已初始化过的主手进行位移监测，来设置摇杆坐标
 		if (static_value[__HGS_ThumbstickKeep] > 0.0f) {
 
-			// ȡ��������������Ϊ�ƶ���
-			auto vec = GetVector(f_hand, P_Palm);
-			glm::vec3 l_start(vec.x, vec.y, vec.z);
+			// 主手中心点
+			glm::vec3 l_start = GetVec3(f_hand, P_Palm);
 
-			// // ���������ĵ�ĽǶ�
+			// 计算当前偏移
 			glm::vec2 l_uv(-(l_start.x - static_value[__HGS_ThumbstickX]), l_start.y - static_value[__HGS_ThumbstickY]);
 
 			l_uv /= 35.0f + 20;
@@ -242,35 +313,38 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 
 			l_uv = CalThumbstick(l_uv);
 
+			// 更新摇杆值
 			static_value[HGS_ThumbstickX] = l_uv.x;
 			static_value[HGS_ThumbstickY] = l_uv.y;
 
-			printf("[%d] ҡ������ %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
+			// printf("[%d] ҡ������ %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
 
-
-			// �۶������Ϊ��������
+			// 只要触发坐标位移，则表示触摸板被接触
 			static_value[HGS_ThumbstickTouch] = static_value[HGS_ThumbstickX] != 0.0f || static_value[HGS_ThumbstickY] != 0.0f;//static_value[HGS_Trigger] > 0.0f;
+			// 扳机控制触摸板按下
 			static_value[HGS_ThumbstickClick] = static_value[HGS_Trigger] >= 1.0f;
 
-			printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
+			// printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
 		}
 
+		TimerCallback& tc = static_lr_timers[f_hand->type];
+		tc.keep();
+		if (tc.check() && tc.callback) {
+			tc.callback();
+			tc.clear();
+		}
 
-
+		// 直接复制返回值
 		gestures = static_gesture;
 		values = static_value;
 
-		// ��������ܻ���
-		/*if (values[HGS_TrackpadClick]) {
-			values[HGS_Trigger] = 0.0f;
-		}*/
-
-		// ҡ�˿��Ƶ�ʱ�򣬽��ð������������Ϊҡ�˰��²���
+		// 摇杆启用时，扳机值在返回值中无效
 		if (values[__HGS_ThumbstickKeep] > 0.0f) {
 			values[HGS_Trigger] = 0.0f;
 		}
 	}
 	else {
+
 		if (gestures.size() == 0) {
 			for (int i = 0; i < gestures.size(); i++) {
 				gestures[(HandGesture)i] = false;

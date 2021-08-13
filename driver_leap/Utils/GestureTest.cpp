@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GestureTest.h"
-#include <glm/glm.hpp>
 #include <numeric>
 
 #define TEST_OPEN
@@ -16,6 +15,12 @@ LEAP_VECTOR GetVector(const LEAP_HAND* f_hand, Position pos) {
 	};
 
 	return vector_array[pos];
+}
+
+glm::vec3 GetVec3(const LEAP_HAND* f_hand, Position pos) {
+	auto vec = GetVector(f_hand, pos);
+	glm::vec3 l_start(vec.x, vec.y, vec.z);
+	return l_start;
 }
 
 float Distance(const std::vector<LEAP_VECTOR>& vecList, const LEAP_VECTOR& vec2) {
@@ -51,7 +56,7 @@ float Distance3D(const float x[3])
 
 static LEAP_VECTOR GetCenter(const LEAP_HAND* f_hand, const std::vector<Position>& positions) {
 
-	LEAP_VECTOR sum = { 0 };
+	LEAP_VECTOR sum = {0};
 	for (int i = 0; i < positions.size(); i++) {
 		LEAP_VECTOR vector = GetVector(f_hand, positions[i]);
 
@@ -152,10 +157,10 @@ public:
 		this->handGesture = handGesture;
 	}
 
-	bool check(const LEAP_HAND* f_hand, const LEAP_HAND* f_oppHand, float* value = 0) {
+	bool check(const LEAP_HAND* f_hand, const LEAP_HAND* f_oppHand, float* value=0) {
 
 		bool result = true;
-
+		
 
 		if (CGestureMatcher::HG_Open == handGesture) {
 			// (53.33, 92.13, 63.91) (66.94, 104.35, 101.31) (70.17, 110.85, 102.77) (76.30, 103.76, 96.66) (65.70, 96.55, 89.01)
@@ -254,8 +259,8 @@ public:
 
 private:
 
-
-
+	
+	
 	CGestureMatcher::HandGesture handGesture;
 };
 
@@ -263,7 +268,7 @@ private:
 bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGesture, const LEAP_HAND* f_oppHand) {
 
 	bool result = false;
-
+	
 	Gesture gesture_emptyhold = Gesture(handGesture);
 	result = gesture_emptyhold.check(f_hand, f_oppHand);
 
@@ -284,7 +289,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 				P_Pinky
 		};
 
-		LEAP_VECTOR vec1 = GetCenter(f_hand, positions);
+	 	LEAP_VECTOR vec1 = GetCenter(f_hand, positions);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 
 		// printf("拇指 %f\n", Distance(f_hand, P_Thumb, P_Palm));
@@ -292,7 +297,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 		return DistanceNormalization(vec1, vec2, 29, 88);
 	}
 	else if (CGestureMatcher::HGS_Trigger == handGesture) {
-
+		
 		LEAP_VECTOR vec1 = GetVector(f_hand, P_Index);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 
@@ -304,7 +309,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 			auto vec1 = GetVector(f_hand, P_Index);
 			auto vec2 = GetVector(f_oppHand, P_Index);
 
-			// printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
+			//printf("%f\n", DistanceNormalization(vec1, vec2, 20, 40));
 
 			// �����ĸ���ָ�ķ�Χ
 			return DistanceNormalization(vec1, vec2, 20, 40);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <LeapC.h>
+#include <glm/glm.hpp>
 #include "CGestureMatcher.h"
 
 enum Position {
@@ -13,6 +14,7 @@ enum Position {
 };
 
 LEAP_VECTOR GetVector(const LEAP_HAND* f_hand, Position pos);
+glm::vec3 GetVec3(const LEAP_HAND* f_hand, Position pos);
 
 // 检查该手势是否可被识别
 bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGesture, const LEAP_HAND* f_oppHand);
