@@ -20,7 +20,7 @@ public:
         HG_IndexTouch,
         HG_PinkyTouch,
 
-        __HG_Disable,
+        __HG_Disable, // 副手手势禁止标志，表示当前手势被用作双手手势
 
         HG_MAX,
     };

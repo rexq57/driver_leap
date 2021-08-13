@@ -128,6 +128,7 @@ else static_value[g] = 0.0f;}
 			static_value[HGS_Trigger] = GestureValue(f_hand, HGS_Trigger, f_oppHand);
 		}*/
 
+		// 先处理三个距离值
 		UpdateValue(-1, HGS_Hold);
 		UpdateValue(HG_Point, HGS_Trigger);
 		UpdateValue(-1, HGS_IndexContact);
@@ -145,18 +146,19 @@ else static_value[g] = 0.0f;}
 					// 当前手掌中心点
 					glm::vec3 l_start = GetVec3(f_oppHand, P_Palm);
 					
+					// 当触摸板没有值的时候，初始化中心点坐标
 					if (static_value[__HGS_TrackpadX] == 0.0f && static_value[__HGS_TrackpadY] == 0.0f) {
 
-						printf("[%d] �������� \n", f_oppHand->type);
+						// printf("[%d] �������� \n", f_oppHand->type);
 
 						static_value[__HGS_TrackpadX] = l_start.x;
 						static_value[__HGS_TrackpadY] = l_start.y;
 					}
 					else {
-						// // ���������ĵ�ĽǶ�
+						// 计算圆盘中心偏移距离（归一化）
 						glm::vec2 l_uv(-(l_start.x - static_value[__HGS_TrackpadX]), l_start.y - static_value[__HGS_TrackpadY]);
 
-						l_uv /= 25.0f;
+						l_uv /= 25.0f; // 圆盘半径
 
 						glm::vec2 old_uv = l_uv;
 
@@ -167,59 +169,62 @@ else static_value[g] = 0.0f;}
 						static_value[HGS_TrackpadY] = l_uv.y;
 					}
 
-					// ���ֿ۶������Ϊ��������
+					// 触摸板按下由主手扳机控制
 					static_value[HGS_TrackpadClick] = static_value[HGS_Trigger] >= 1.0f;
 
-					// ���ø�������
+					// 禁止副手手势
 					static_gesture2[__HG_Disable] = true;
 				}
 			}
 
-			// ˫��ָ�� (�������״̬��ǰ���ǣ��ް��״̬)
+			// 双手手枪时的手势确认(为了防止误识别，设定双手扳机不能扣下)
 			float oppTrigger = GestureValue(f_oppHand, HGS_Trigger, f_hand);
 			if (static_gesture[HG_Point] && static_value[HGS_Trigger] < 0.25f && oppTrigger < 0.25f) {
 
+				// 确定第一时间初始化
 				bool reset = static_gesture2[HG_Point] && static_value[__HGS_ThumbstickKeep] == 0.0f;
 
+				// 已初始化，但未进入单手控制状态时
 				if (static_value[__HGS_ThumbstickKeep] == 0.5f) {
-					// ���ָ����ͷ����֣��������ƶ�����ʱ��
+					// 副手空手势时的操作
 					if (static_gesture2[HG_Open]) {
+						// 如果主手位移超过0.5半径，重设状态（保证主手以当前位置再次初始化）
 						if (DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]) >= 0.5f) {
 							reset = true;
 						}
 						else {
+							// 主手不动，副手立马空手势，即希望副手腾出来，设置此单手摇杆持续标记
 							static_value[__HGS_ThumbstickKeep] = 1.0f;
 						}
 					}
 				}
 
-				// ȡ��������������Ϊ�ƶ���
-				glm::vec3 l_start = GetVec3(f_hand, P_Palm);
-
 				if (reset) {
 
-					printf("[%d] ҡ������ \n", f_hand->type);
+					// printf("[%d] ҡ������ \n", f_hand->type);
+
+					// 主手中心点
+					glm::vec3 l_start = GetVec3(f_hand, P_Palm);
 
 					static_value[HGS_ThumbstickX] = 0.0f;
 					static_value[HGS_ThumbstickY] = 0.0f;
-					static_value[__HGS_ThumbstickX] = l_start.x;
+					static_value[__HGS_ThumbstickX] = l_start.x; // 记录中心点
 					static_value[__HGS_ThumbstickY] = l_start.y;
 					
-					static_value[__HGS_ThumbstickKeep] = 0.5f;//init ? 0.5f : 0.0f; // ��λ�����������ȫ��Ч����Ҫ���½���״̬
+					static_value[__HGS_ThumbstickKeep] = 0.5f; // 初始化过的标记
 					static_value[HGS_ThumbstickTouch] = 0.0f;
 					//static_value[HGS_ThumbstickClick] = 0.0f;
 				}
-
-				
 			}
 		}
 
+		// 对已初始化过的主手进行位移监测，来设置摇杆坐标
 		if (static_value[__HGS_ThumbstickKeep] > 0.0f) {
 
-			// ȡ��������������Ϊ�ƶ���
+			// 主手中心点
 			glm::vec3 l_start = GetVec3(f_hand, P_Palm);
 
-			// // ���������ĵ�ĽǶ�
+			// 计算当前偏移
 			glm::vec2 l_uv(-(l_start.x - static_value[__HGS_ThumbstickX]), l_start.y - static_value[__HGS_ThumbstickY]);
 
 			l_uv /= 35.0f + 20;
@@ -236,30 +241,25 @@ else static_value[g] = 0.0f;}
 				
 			l_uv = CalThumbstick(l_uv);
 
+			// 更新摇杆值
 			static_value[HGS_ThumbstickX] = l_uv.x;
 			static_value[HGS_ThumbstickY] = l_uv.y;
 
-			printf("[%d] ҡ������ %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
+			// printf("[%d] ҡ������ %.2f, %.2f \n", f_hand->type, static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]);
 
-
-			// �۶������Ϊ��������
+			// 只要触发坐标位移，则表示触摸板被接触
 			static_value[HGS_ThumbstickTouch] = static_value[HGS_ThumbstickX] != 0.0f || static_value[HGS_ThumbstickY] != 0.0f;//static_value[HGS_Trigger] > 0.0f;
+			// 扳机控制触摸板按下
 			static_value[HGS_ThumbstickClick] = static_value[HGS_Trigger] >= 1.0f;
 			
-			printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
+			// printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
 		}
 
-		
-
+		// 直接复制返回值
 		gestures = static_gesture;
 		values = static_value;
 
-		// ��������ܻ���
-		/*if (values[HGS_TrackpadClick]) {
-			values[HGS_Trigger] = 0.0f;
-		}*/
-
-		// ҡ�˿��Ƶ�ʱ�򣬽��ð������������Ϊҡ�˰��²���
+		// 摇杆启用时，扳机值在返回值中无效
 		if (values[__HGS_ThumbstickKeep] > 0.0f) {
 			values[HGS_Trigger] = 0.0f;
 		}
