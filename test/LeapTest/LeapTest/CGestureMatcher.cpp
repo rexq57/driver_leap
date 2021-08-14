@@ -103,6 +103,8 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			// 空手手势总是被初始化为false
 			static_gesture[HG_Open] = false;
 
+			// printf("识别到 %d\n", gesture);
+
 			// 空手手势将清空当前手的所有值
 			if (gesture == HG_Open) {
 				for (auto it : static_gesture) {
@@ -171,7 +173,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					milliseconds cost_ms = std::chrono::duration_cast<milliseconds>(end - start);
 					// 连续做出手枪手势后，触发计时器
 					if (cost_ms.count() < 150) {
-						static_lr_timers[type].push_back(TimerCallback(2000, [&static_value]() {
+						static_lr_timers[type].push_back(TimerCallback(1000, [&static_value]() {
 							static_value[HGS_Trigger] = 0.0f;
 							}, [&static_value, type]() {
 								static_lr_timers[type].push_back(TimerCallback(200, [&static_value]() {
@@ -341,7 +343,7 @@ else static_value[g] = 0.0f;}
 				timers.erase(timers.begin() + 0);
 			}
 		}
-		
+
 
 		// 直接复制返回值
 		gestures = static_gesture;

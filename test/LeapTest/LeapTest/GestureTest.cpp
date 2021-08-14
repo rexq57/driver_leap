@@ -169,8 +169,13 @@ public:
 				DistanceRule(P_Index, P_Palm, 65, 112),
 				DistanceRule(P_Middle, P_Palm, 69, 116),
 				DistanceRule(P_Ring, P_Palm, 67.60, 114),
-				DistanceRule(P_Pinky, P_Palm, 65, 101),
+				//DistanceRule(P_Pinky, P_Palm, 65, 101),
+				DistanceRule(P_Index, P_Thumb, 50, 1000),
+				DistanceRule(P_Pinky, P_Thumb, 69, 1000),
 			};
+
+			//printf("test %f %f %f %f\n", Distance(f_hand, P_Index, P_Thumb), Distance(f_hand, P_Middle, P_Thumb), Distance(f_hand, P_Ring, P_Thumb), Distance(f_hand, P_Pinky, P_Thumb));
+
 			result = DistanceLimit(f_hand, dis_rules);
 		}
 		else if (CGestureMatcher::HG_EmptyHold == handGesture) {
