@@ -55,7 +55,7 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			callback = 0;
 		}
 	};
-	static TimerCallback static_lr_timers[2];
+	static std::vector<TimerCallback> static_lr_timers[2];
 
 	// 需要检测的有效手势
 	static const std::vector<HandGesture> detect_gestures = {
@@ -171,15 +171,15 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 					milliseconds cost_ms = std::chrono::duration_cast<milliseconds>(end - start);
 					// 连续做出手枪手势后，触发计时器
 					if (cost_ms.count() < 150) {
-						static_lr_timers[type] = TimerCallback(2000, [&static_value]() {
+						static_lr_timers[type].push_back(TimerCallback(1000, [&static_value]() {
 							static_value[HGS_Trigger] = 0.0f;
 							}, [&static_value, type]() {
-								static_lr_timers[type] = TimerCallback(200, [&static_value]() {
+								static_lr_timers[type].push_back(TimerCallback(200, [&static_value]() {
 									static_value[HGS_Trigger] = 1.0f;
 									}, [&static_value]() {
 										static_value[HGS_Trigger] = 0.0f;
-									});
-							});
+									}));
+							}));
 
 						//printf("fuck you %dms\n", cost_ms.count());
 						//printf("\n");
@@ -331,12 +331,17 @@ else static_value[g] = 0.0f;}
 			// printf("%.2f %.2f %.2f %.2f\n", DistanceCenter(static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY]), static_value[HGS_ThumbstickX], static_value[HGS_ThumbstickY], static_value[__HGS_ThumbstickKeep]);
 		}
 
-		TimerCallback tc = static_lr_timers[f_hand->type];
-		tc.keep();
-		if (tc.check() && tc.callback) {
-			tc.callback();
-			//tc.clear();
+		std::vector<TimerCallback>& timers = static_lr_timers[f_hand->type];
+		if (timers.size() > 0) {
+			TimerCallback& tc = timers[0];
+			tc.keep();
+			if (tc.check() && tc.callback) {
+				tc.callback();
+				//tc.clear();
+				timers.erase(timers.begin() + 0);
+			}
 		}
+
 
 		// 直接复制返回值
 		gestures = static_gesture;
