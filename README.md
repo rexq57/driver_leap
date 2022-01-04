@@ -3,6 +3,12 @@
 1、下载驱动 https://developer.leapmotion.com/sdk-leap-motion-controller
 2、下载leap插件放到steamvr的drivers目录(在库中右键SteamVR浏览本地文件) https://github.com/rexq57/driver_leap/releases
 
+3、修改以下文件
+
+[Steam]\steamapps\common\SteamVR\resources\settings\default.vrsettings
+
+将activateMultipleDrivers的值改为true
+
 
 
 ## 操作：
