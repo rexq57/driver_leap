@@ -56,7 +56,7 @@ float Distance3D(const float x[3])
 
 static LEAP_VECTOR GetCenter(const LEAP_HAND* f_hand, const std::vector<Position>& positions) {
 
-	LEAP_VECTOR sum = { 0 };
+	LEAP_VECTOR sum = {0};
 	for (int i = 0; i < positions.size(); i++) {
 		LEAP_VECTOR vector = GetVector(f_hand, positions[i]);
 
@@ -148,6 +148,9 @@ float Distance(const LEAP_HAND* f_hand, Position pos1, Position pos2) {
 	return l_length;
 }
 
+bool PalmIsUp(const LEAP_VECTOR& v) {
+	return v.x < 0.5 && v.y < 0 && v.z < 0;
+}
 
 class Gesture {
 
@@ -157,10 +160,10 @@ public:
 		this->handGesture = handGesture;
 	}
 
-	bool check(const LEAP_HAND* f_hand, const LEAP_HAND* f_oppHand, float* value = 0) {
+	bool check(const LEAP_HAND* f_hand, const LEAP_HAND* f_oppHand, float* value=0) {
 
 		bool result = true;
-
+		
 
 		if (CGestureMatcher::HG_Open == handGesture) {
 			// (53.33, 92.13, 63.91) (66.94, 104.35, 101.31) (70.17, 110.85, 102.77) (76.30, 103.76, 96.66) (65.70, 96.55, 89.01)
@@ -175,6 +178,9 @@ public:
 			};
 
 			//printf("test %f %f %f %f\n", Distance(f_hand, P_Index, P_Thumb), Distance(f_hand, P_Middle, P_Thumb), Distance(f_hand, P_Ring, P_Thumb), Distance(f_hand, P_Pinky, P_Thumb));
+
+			// 打印手掌朝向
+			printf("朝向 %f %f %f %d\n", f_hand->palm.normal.x, f_hand->palm.normal.y, f_hand->palm.normal.z, PalmIsUp(f_hand->palm.normal));
 
 			result = DistanceLimit(f_hand, dis_rules);
 		}
@@ -226,13 +232,15 @@ public:
 
 			// �����ĸ���ָ�ķ�Χ
 			result = DistanceLimit(f_hand, dis_rules);
+
+			if (!PalmIsUp(f_hand->palm.normal)) result = false;
 		}
 		else if (CGestureMatcher::HG_PinkyTouch == handGesture) {
 			std::vector<DistanceRule> dis_rules = {
 				DistanceRule(P_Index, P_Thumb, 65, 112),
 				//DistanceRule(P_Middle, P_Palm, 69, 116),
 				//DistanceRule(P_Ring, P_Palm, 67.60, 114),
-				DistanceRule(P_Pinky, P_Thumb, 20, 68),
+				DistanceRule(P_Pinky, P_Thumb, 10, 68),
 			};
 
 			// 食指与拇指距离
@@ -240,6 +248,8 @@ public:
 
 			// �����ĸ���ָ�ķ�Χ
 			result = DistanceLimit(f_hand, dis_rules);
+
+			if (!PalmIsUp(f_hand->palm.normal)) result = false;
 		}
 		else {
 			assert(!"error");
@@ -264,8 +274,8 @@ public:
 
 private:
 
-
-
+	
+	
 	CGestureMatcher::HandGesture handGesture;
 };
 
@@ -273,7 +283,7 @@ private:
 bool GestureTest(const LEAP_HAND* f_hand, CGestureMatcher::HandGesture handGesture, const LEAP_HAND* f_oppHand) {
 
 	bool result = false;
-
+	
 	Gesture gesture_emptyhold = Gesture(handGesture);
 	result = gesture_emptyhold.check(f_hand, f_oppHand);
 
@@ -294,7 +304,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 				P_Pinky
 		};
 
-		LEAP_VECTOR vec1 = GetCenter(f_hand, positions);
+	 	LEAP_VECTOR vec1 = GetCenter(f_hand, positions);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 
 		// printf("拇指 %f\n", Distance(f_hand, P_Thumb, P_Palm));
@@ -302,7 +312,7 @@ float GestureValue(const LEAP_HAND* f_hand, CGestureMatcher::HandGestureSub hand
 		return DistanceNormalization(vec1, vec2, 29, 88);
 	}
 	else if (CGestureMatcher::HGS_Trigger == handGesture) {
-
+		
 		LEAP_VECTOR vec1 = GetVector(f_hand, P_Index);
 		LEAP_VECTOR vec2 = GetVector(f_hand, P_Palm);
 

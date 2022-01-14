@@ -148,6 +148,9 @@ float Distance(const LEAP_HAND* f_hand, Position pos1, Position pos2) {
 	return l_length;
 }
 
+bool PalmIsUp(const LEAP_VECTOR& v) {
+	return v.x < 0.5 && v.y < 0 && v.z < 0;
+}
 
 class Gesture {
 
@@ -175,6 +178,9 @@ public:
 			};
 
 			//printf("test %f %f %f %f\n", Distance(f_hand, P_Index, P_Thumb), Distance(f_hand, P_Middle, P_Thumb), Distance(f_hand, P_Ring, P_Thumb), Distance(f_hand, P_Pinky, P_Thumb));
+
+			// 打印手掌朝向
+			printf("朝向 %f %f %f %d\n", f_hand->palm.normal.x, f_hand->palm.normal.y, f_hand->palm.normal.z, PalmIsUp(f_hand->palm.normal));
 
 			result = DistanceLimit(f_hand, dis_rules);
 		}
@@ -226,13 +232,15 @@ public:
 
 			// �����ĸ���ָ�ķ�Χ
 			result = DistanceLimit(f_hand, dis_rules);
+
+			if (!PalmIsUp(f_hand->palm.normal)) result = false;
 		}
 		else if (CGestureMatcher::HG_PinkyTouch == handGesture) {
 			std::vector<DistanceRule> dis_rules = {
 				DistanceRule(P_Index, P_Thumb, 65, 112),
 				//DistanceRule(P_Middle, P_Palm, 69, 116),
 				//DistanceRule(P_Ring, P_Palm, 67.60, 114),
-				DistanceRule(P_Pinky, P_Thumb, 20, 68),
+				DistanceRule(P_Pinky, P_Thumb, 10, 68),
 			};
 
 			// 食指与拇指距离
@@ -240,6 +248,8 @@ public:
 
 			// �����ĸ���ָ�ķ�Χ
 			result = DistanceLimit(f_hand, dis_rules);
+
+			if (!PalmIsUp(f_hand->palm.normal)) result = false;
 		}
 		else {
 			assert(!"error");

@@ -103,6 +103,8 @@ void CGestureMatcher::GetGestures(const LEAP_HAND* f_hand, std::map<HandGesture,
 			// 空手手势总是被初始化为false
 			static_gesture[HG_Open] = false;
 
+			// printf("识别到 %d\n", gesture);
+
 			// 空手手势将清空当前手的所有值
 			if (gesture == HG_Open) {
 				for (auto it : static_gesture) {
@@ -254,7 +256,9 @@ else static_value[g] = 0.0f;}
 
 			// 双手手枪时的手势确认(为了防止误识别，设定双手扳机不能扣下)
 			float oppTrigger = GestureValue(f_oppHand, HGS_Trigger, f_hand);
-			if (static_gesture[HG_Point] && static_value[HGS_Trigger] < 0.25f /*&& oppTrigger < 0.25f*/) {
+			bool twoIndexReady = static_gesture[HG_Point] && static_value[HGS_Trigger] < 0.25f && oppTrigger < 0.25f;
+			bool already = static_value[__HGS_ThumbstickKeep] > 0.0f;
+			if (twoIndexReady) {
 
 				// 确定第一时间初始化
 				bool reset = static_gesture2[HG_Point] && static_value[__HGS_ThumbstickKeep] == 0.0f;
